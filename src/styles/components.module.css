@@ -84,6 +84,10 @@
   align-items: center;
 }
 
+.header__account-dropdown {
+  position: relative;
+}
+
 .header__account-btn {
   background: #f3f4f6;
   color: #374151;
@@ -94,10 +98,59 @@
   font-weight: 500;
   cursor: pointer;
   transition: background-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .header__account-btn:hover {
   background: #e5e7eb;
+}
+
+.header__dropdown-icon {
+  transition: transform 0.2s ease;
+}
+
+.header__dropdown-icon--open {
+  transform: rotate(180deg);
+}
+
+.header__dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow:
+    0 4px 6px -1px rgb(0 0 0 / 10%),
+    0 2px 4px -1px rgb(0 0 0 / 6%);
+  min-width: 200px;
+  z-index: 50;
+  padding: 8px 0;
+}
+
+.header__dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  color: #374151;
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+}
+
+.header__dropdown-item:hover {
+  background: #f3f4f6;
+  text-decoration: none;
+  color: #111827;
+}
+
+.header__dropdown-separator {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 8px 0;
 }
 
 /* Footer Component Styles */
