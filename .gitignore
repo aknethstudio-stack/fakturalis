@@ -1,0 +1,202 @@
+# -----------------------------
+# Node/TypeScript/Next.js .gitignore
+# -----------------------------
+
+# Dependencies
+node_modules/
+
+# Next.js build output
+.next/
+out/
+
+# General build artifacts
+dist/
+build/
+
+# Caches
+.cache/
+.parcel-cache/
+.turbo/
+.swc/
+.eslintcache
+.stylelintcache
+.nyc_output/
+coverage/
+.vite/
+.vite-inspect/
+.jest-cache/
+jest-cache/
+tsconfig.tsbuildinfo
+*.tsbuildinfo
+
+# Package manager caches
+.pnpm-store/
+.npm/
+
+# Yarn (Berry) - keep important subfolders if using Yarn 2+
+.yarn/*
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions
+
+# Bun
+.bun/
+.bun-cache/
+
+# Hosting / platform artifacts
+.vercel/
+.netlify/
+.serverless/
+.firebase/
+.aws-sam/
+
+# Logs and temp files
+logs/
+*.log
+*.log.*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+tmp/
+temp/
+.tmp/
+.temp/
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# Environment files (keep examples)
+.env
+.env.*
+!.env.example
+!.env.*.example
+.envrc
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Test artifacts
+reports/
+test-results/
+junit.xml
+cypress/videos/
+cypress/screenshots/
+cypress/downloads/
+playwright-report/
+playwright/.cache/
+playwright/.reporter-temp/
+.vitest/
+vitest-report/
+
+# Storybook
+storybook-static/
+dist-storybook/
+
+# OS / IDE / VCS noise
+# macOS
+.DS_Store
+**/.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# Editors and IDEs
+.vscode/
+.zed/
+.idea/
+.fleet/
+.history/
+.direnv/
+*.swp
+*.swo
+*~
+.vim/
+.emacs.d/
+.atom/
+.sublime-*
+
+# Version control
+.git/
+.svn/
+.hg/
+.bzr/
+CVS/
+
+# Misc build artifacts
+.esbuild/
+webpack-stats.json
+*.bundle.*
+
+# Archives
+*.tgz
+*.zip
+*.br
+*.tar
+*.tar.gz
+*.7z
+*.rar
+
+# Database files
+*.sqlite
+*.sqlite3
+*.db
+
+# Security and certificates
+*.pem
+*.key
+*.cert
+*.crt
+*.p12
+*.pfx
+
+# Docker
+.docker/
+docker-compose.override.yml
+.dockerignore
+Dockerfile.local
+
+# Monitoring and analytics
+.sentry/
+.datadog/
+
+# Local development notes (keep in repo for team)
+# local-notes/
