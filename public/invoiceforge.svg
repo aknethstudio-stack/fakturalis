@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="315.26538"
+   height="498.7561"
+   viewBox="0 0 315.26538 498.7561"
+   version="1.1"
+   id="svg1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1" />
+  <g
+     id="layer1"
+     transform="translate(-98.367302,-6.6219506)">
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:120px;font-family:'FiraMono Nerd Font';-inkscape-font-specification:'FiraMono Nerd Font';text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#ff7000;fill-opacity:1;stroke:none;stroke-width:69.715;stroke-linejoin:bevel;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke markers fill"
+       x="118.07047"
+       y="135.46997"
+       id="text5"><tspan
+         id="tspan5"
+         x="118.07047"
+         y="135.46997"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:120px;font-family:'FiraMono Nerd Font';-inkscape-font-specification:'FiraMono Nerd Font';fill:#ff7000;fill-opacity:1;stroke-width:69.715">$$</tspan></text>
+    <g
+       id="g7"
+       transform="translate(-21.341558,3.0119292)">
+      <path
+         id="rect2"
+         d="M 156.08564,11.279812 297.40129,9.6735241 C 300.48768,9.6384431 428.10421,158.93325 428.10821,160.45905 l 0.80314,305.53029 c 0.0441,16.79389 -13.52003,30.31398 -30.31396,30.31398 H 156.08564 c -16.79395,0 -30.31398,-13.52003 -30.31398,-30.31398 V 41.593781 c 0,-16.79394 13.52111,-30.123091 30.31398,-30.313969 z"
+         style="fill:none;stroke:#8b5cf6;stroke-width:12.1256;stroke-linejoin:bevel;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke markers fill" />
+      <path
+         style="fill:#8b5cf6;fill-opacity:1;stroke:#8b5cf6;stroke-width:11.6792;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke markers fill"
+         d="M 299.69997,15.307306 420.01613,159.46524 300.50209,158.6271 Z"
+         id="path5" />
+      <rect
+         style="fill:none;fill-opacity:1;stroke:#8b5cf6;stroke-width:8.15485;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke markers fill"
+         id="rect5"
+         width="254.34509"
+         x="150.16901"
+         y="262.61893"
+         height="1.8451476" />
+      <rect
+         style="fill:none;fill-opacity:1;stroke:#8b5cf6;stroke-width:7.9922;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke markers fill"
+         id="rect5-1"
+         width="254.5078"
+         x="149.42529"
+         y="455.14099"
+         height="2.0078034" />
+    </g>
+    <g
+       id="g8"
+       transform="translate(-2.6494245,-48.889167)">
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:53.3333px;font-family:'FiraMono Nerd Font';-inkscape-font-specification:'FiraMono Nerd Font';text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#ff7000;fill-opacity:1;stroke:none;stroke-width:12.5;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke markers fill"
+         x="129.95612"
+         y="276.27023"
+         id="text6"><tspan
+           id="tspan6"
+           x="129.95612"
+           y="276.27023"
+           style="font-size:53.3333px">InvForge</tspan></text>
+    </g>
+    <g
+       id="g1"
+       transform="translate(0.85059357,-18.545925)"
+       style="fill:#fdba74;fill-opacity:1">
+      <rect
+         style="fill:#fdba74;fill-opacity:1;stroke:#8b5cf6;stroke-width:12.8376;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke markers fill"
+         id="rect9"
+         width="246.53691"
+         height="114.60547"
+         x="131.88095"
+         y="322.88901" />
+      <path
+         style="fill:#fdba74;fill-opacity:1;stroke:#8b5cf6;stroke-width:10;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke markers fill"
+         d="M 256.33118,321.90427 V 435.16689 Z"
+         id="path13" />
+      <path
+         style="fill:#fdba74;fill-opacity:1;stroke:#8b5cf6;stroke-width:10.1907;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke markers fill"
+         d="M 375.15088,380.8176 H 135.30203 Z"
+         id="path13-2-2" />
+    </g>
+  </g>
+</svg>

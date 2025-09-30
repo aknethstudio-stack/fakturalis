@@ -1,5 +1,11 @@
-import { ArrowRight, BarChart3, FileText, Package, Users } from 'lucide-react';
 import Link from 'next/link';
+import {
+  BsArrowRight as ArrowRight,
+  BsBarChart as BarChart3,
+  BsFileText as FileText,
+  BsBox as Package,
+  BsPeople as Users,
+} from 'react-icons/bs';
 
 export default function Page() {
   return (

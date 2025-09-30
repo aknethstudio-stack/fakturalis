@@ -1,27 +1,37 @@
+import Image from 'next/image';
 import Link from 'next/link';
-import styles from '@/styles/components.module.css';
+import { BsBox, BsCurrencyDollar, BsFileEarmarkText, BsPeople } from 'react-icons/bs';
 
 export default function Header() {
   return (
-    <header className={styles.header}>
-      <div className={styles.header__container}>
-        <div className={styles.header__content}>
+    <header className='header'>
+      <div className='header__container'>
+        <div className='header__content'>
           {/* Logo */}
-          <Link href='/' className={styles.header__logo}>
-            <div className={styles.header__logo_icon}>IF</div>
-            <span className={styles.header__logo_text}>InvoiceForge</span>
+          <Link href='/' className='header__logo'>
+            <div className='header__logo-icon'>
+              <Image src='/invoiceforge.svg' alt='InvoiceForge Logo' width={40} height={40} priority />
+            </div>
+            <span className='header__logo-text'>InvoiceForge</span>
           </Link>
 
           {/* Navigation */}
           <nav className='header__nav'>
             <Link href='/invoices' className='header__nav-link'>
-              Faktury
+              <BsFileEarmarkText size={16} />
+              <span>Faktury</span>
             </Link>
             <Link href='/clients' className='header__nav-link'>
-              Klienci
+              <BsPeople size={16} />
+              <span>Klienci</span>
             </Link>
             <Link href='/products' className='header__nav-link'>
-              Produkty
+              <BsBox size={16} />
+              <span>Produkty</span>
+            </Link>
+            <Link href='/pricing' className='header__nav-link'>
+              <BsCurrencyDollar size={16} />
+              <span>Cennik</span>
             </Link>
           </nav>
 

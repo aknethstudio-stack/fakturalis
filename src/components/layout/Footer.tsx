@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 
 export default function Footer() {
@@ -8,7 +9,9 @@ export default function Footer() {
           {/* Logo */}
           <div>
             <div className='footer__logo'>
-              <div className='footer__logo-icon'>IF</div>
+              <div className='footer__logo-icon'>
+                <Image src='/invoiceforge.svg' alt='InvoiceForge Logo' width={40} height={40} />
+              </div>
               <span className='footer__logo-text'>InvoiceForge</span>
             </div>
             <p className='footer__description'>System fakturowania dla polskich firm.</p>
@@ -31,6 +34,38 @@ export default function Footer() {
               <li>
                 <Link href='/products' className='footer__link'>
                   Produkty
+                </Link>
+              </li>
+              <li>
+                <Link href='/pricing' className='footer__link'>
+                  Cennik
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Legal */}
+          <div>
+            <h3 className='footer__section-title'>Prawne</h3>
+            <ul className='footer__links'>
+              <li>
+                <Link href='/terms' className='footer__link'>
+                  Regulamin
+                </Link>
+              </li>
+              <li>
+                <Link href='/privacy' className='footer__link'>
+                  Polityka Prywatności
+                </Link>
+              </li>
+              <li>
+                <Link href='/gdpr' className='footer__link'>
+                  RODO
+                </Link>
+              </li>
+              <li>
+                <Link href='/cookies' className='footer__link'>
+                  Polityka Cookies
                 </Link>
               </li>
             </ul>

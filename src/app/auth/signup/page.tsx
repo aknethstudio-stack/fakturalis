@@ -4,11 +4,17 @@ import HCaptchaComponent, { type HCaptchaRef } from '@/components/ui/HCaptcha';
 import { useAuth } from '@/hooks/use-supabase';
 import { signupSchema, type SignupFormData } from '@/lib/validations/auth';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Eye, EyeOff, Lock, Mail, UserPlus } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import {
+  BsEye as Eye,
+  BsEyeSlash as EyeOff,
+  BsLock as Lock,
+  BsEnvelope as Mail,
+  BsPersonPlus as UserPlus,
+} from 'react-icons/bs';
 
 export default function SignUpPage() {
   const [isLoading, setIsLoading] = useState(false);

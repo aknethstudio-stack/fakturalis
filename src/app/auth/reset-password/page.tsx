@@ -1,12 +1,12 @@
 'use client';
 
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import Link from 'next/link';
-import { Mail, ArrowLeft, CheckCircle } from 'lucide-react';
 import { useAuth } from '@/hooks/use-supabase';
 import { resetPasswordSchema, type ResetPasswordFormData } from '@/lib/validations/auth';
+import { zodResolver } from '@hookform/resolvers/zod';
+import Link from 'next/link';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { BsArrowLeft as ArrowLeft, BsCheckCircle as CheckCircle, BsEnvelope as Mail } from 'react-icons/bs';
 
 export default function ResetPasswordPage() {
   const [isLoading, setIsLoading] = useState(false);

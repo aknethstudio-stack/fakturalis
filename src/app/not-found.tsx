@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { FileX, Home, ArrowLeft } from 'lucide-react';
+import { BsArrowLeft as ArrowLeft, BsFileX as FileX, BsHouse as Home } from 'react-icons/bs';
 
 export default function NotFound() {
   return (

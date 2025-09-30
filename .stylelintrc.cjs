@@ -60,5 +60,8 @@ module.exports = {
         ignore: ['consecutive-duplicates-with-different-values'],
       },
     ],
+    
+    // Allow BEM notation for CSS class names (header__logo, footer__link, etc.)
+    'selector-class-pattern': null,
   },
 };

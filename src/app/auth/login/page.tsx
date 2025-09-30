@@ -4,11 +4,17 @@ import HCaptchaComponent, { type HCaptchaRef } from '@/components/ui/HCaptcha';
 import { useAuth } from '@/hooks/use-supabase';
 import { loginSchema, type LoginFormData } from '@/lib/validations/auth';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Eye, EyeOff, Lock, LogIn, Mail } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import {
+  BsEye as Eye,
+  BsEyeSlash as EyeOff,
+  BsLock as Lock,
+  BsBoxArrowInRight as LogIn,
+  BsEnvelope as Mail,
+} from 'react-icons/bs';
 
 function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);

@@ -1,9 +1,9 @@
 'use client';
 
 import { useAuth } from '@/hooks/use-supabase';
-import { LogOut } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import { BsBoxArrowRight as LogOut } from 'react-icons/bs';
 
 export default function LogoutPage() {
   const router = useRouter();

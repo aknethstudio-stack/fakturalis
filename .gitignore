@@ -200,3 +200,7 @@ Dockerfile.local
 
 # Local development notes (keep in repo for team)
 # local-notes/
+
+
+#Ignore vscode AI rules
+.github\instructions\codacy.instructions.md
