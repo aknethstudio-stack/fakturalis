@@ -6,7 +6,7 @@
 MUST include `owner_id = auth.uid()`. Core entities: `clients` → `invoices` → `invoice_items` with
 optional `products` catalog.
 
-**Stack**: Next.js 14 (App Router) + TypeScript + Supabase + Tailwind CSS v4 + Zod validation +
+**Stack**: Next.js 15 (App Router) + TypeScript + Supabase + Tailwind CSS v4 + Zod validation +
 React Hook Form
 
 ## 🔒 Database Security Pattern

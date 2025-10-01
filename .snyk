@@ -1,0 +1,15 @@
+# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
+version: v1.0.0
+# ignores vulnerabilities until expiry date; change duration by modifying expiry date
+ignore: {}
+# patches apply the minimum changes required to fix a vulnerability
+patch: {}
+
+# Exclude VS Code configuration files from IaC scanning
+exclude:
+  iac-scan:
+    - .vscode/**
+    - .vscode/extensions.json
+    - .vscode/settings.json
+    - .vscode/tasks.json
+    - .vscode/launch.json

@@ -8,15 +8,14 @@ const csp = [
   "img-src 'self' data: blob:",
   "font-src 'self' data:",
   "object-src 'none'",
-  "script-src 'self'",
-  "style-src 'self' 'unsafe-inline'",
-  "connect-src 'self' https: wss:",
+  "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.hcaptcha.com https://hcaptcha.com",
+  "style-src 'self' 'unsafe-inline' https://hcaptcha.com https://newassets.hcaptcha.com",
+  "connect-src 'self' https: wss: ws: https://hcaptcha.com https://api.hcaptcha.com",
+  "frame-src 'self' https://hcaptcha.com https://newassets.hcaptcha.com",
 ].join('; ');
 
 const nextConfig: NextConfig = {
-  // Strict mode to surface potential issues
-  reactStrictMode: true,
-  // Remove X-Powered-By for a smaller attack surface
+  reactStrictMode: false,
   poweredByHeader: false,
 
   // Image formats optimized on Vercel

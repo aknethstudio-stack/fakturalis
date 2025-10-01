@@ -1,6 +1,8 @@
 'use client';
 
+import AnimatedInput from '@/components/ui/AnimatedInput';
 import HCaptchaComponent, { type HCaptchaRef } from '@/components/ui/HCaptcha';
+import PasswordStrength from '@/components/ui/PasswordStrength';
 import { useAuth } from '@/hooks/use-supabase';
 import { signupSchema, type SignupFormData } from '@/lib/validations/auth';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -21,6 +23,8 @@ export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [_password, _setPassword] = useState('');
+  const [showPasswordStrength, setShowPasswordStrength] = useState(false);
   const captchaRef = useRef<HCaptchaRef>(null);
   const router = useRouter();
   const { signUpWithEmail } = useAuth();
@@ -30,9 +34,12 @@ export default function SignUpPage() {
     handleSubmit,
     formState: { errors },
     setError,
+    watch,
   } = useForm<SignupFormData>({
     resolver: zodResolver(signupSchema),
   });
+
+  const passwordValue = watch('password', '');
 
   const handleCaptchaVerify = (token: string) => {
     setCaptchaToken(token);
@@ -81,97 +88,67 @@ export default function SignUpPage() {
         </div>
 
         {/* Form */}
-        <form className='mt-8 space-y-6' onSubmit={handleSubmit(onSubmit)}>
+        <form className='animate-slide-up mt-8 space-y-6' onSubmit={handleSubmit(onSubmit)}>
           {/* Global Error */}
           {errors.root && (
-            <div className='rounded-md bg-red-50 p-4'>
+            <div className='animate-fade-in rounded-md bg-red-50 p-4'>
               <div className='text-sm text-red-700'>{errors.root.message}</div>
             </div>
           )}
 
-          <div className='space-y-4'>
+          <div className='space-y-6'>
             {/* Email */}
-            <div>
-              <label htmlFor='email' className='block text-sm font-medium text-gray-700'>
-                Email
-              </label>
-              <div className='relative mt-1'>
-                <div className='pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3'>
-                  <Mail className='h-5 w-5 text-gray-400' />
-                </div>
-                <input
-                  {...register('email')}
-                  id='email'
-                  type='email'
-                  autoComplete='email'
-                  className='relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 pl-10 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-blue-500 focus:ring-blue-500 focus:outline-none sm:text-sm'
-                  placeholder='nazwa@przykład.pl'
-                />
-              </div>
-              {errors.email && <p className='mt-1 text-sm text-red-600'>{errors.email.message}</p>}
-            </div>
+            <AnimatedInput
+              {...register('email')}
+              label='Email'
+              type='email'
+              placeholder='nazwa@przykład.pl'
+              icon={<Mail className='h-5 w-5' />}
+              error={errors.email?.message}
+              autoComplete='email'
+            />
 
             {/* Password */}
             <div>
-              <label htmlFor='password' className='block text-sm font-medium text-gray-700'>
-                Hasło
-              </label>
-              <div className='relative mt-1'>
-                <div className='pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3'>
-                  <Lock className='h-5 w-5 text-gray-400' />
-                </div>
-                <input
-                  {...register('password')}
-                  id='password'
-                  type={showPassword ? 'text' : 'password'}
-                  autoComplete='new-password'
-                  className='relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 pr-10 pl-10 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-blue-500 focus:ring-blue-500 focus:outline-none sm:text-sm'
-                  placeholder='Co najmniej 8 znaków'
-                />
-                <button
-                  type='button'
-                  className='absolute inset-y-0 right-0 flex items-center pr-3'
-                  onClick={() => setShowPassword(!showPassword)}>
-                  {showPassword ? (
-                    <EyeOff className='h-5 w-5 text-gray-400 hover:text-gray-600' />
-                  ) : (
-                    <Eye className='h-5 w-5 text-gray-400 hover:text-gray-600' />
-                  )}
-                </button>
-              </div>
-              {errors.password && <p className='mt-1 text-sm text-red-600'>{errors.password.message}</p>}
+              <AnimatedInput
+                {...register('password')}
+                label='Hasło'
+                type={showPassword ? 'text' : 'password'}
+                placeholder='Co najmniej 8 znaków'
+                icon={<Lock className='h-5 w-5' />}
+                rightIcon={
+                  <button
+                    type='button'
+                    className='text-gray-400 transition-colors hover:text-gray-600'
+                    onClick={() => setShowPassword(!showPassword)}>
+                    {showPassword ? <EyeOff className='h-5 w-5' /> : <Eye className='h-5 w-5' />}
+                  </button>
+                }
+                error={errors.password?.message}
+                autoComplete='new-password'
+                onFocus={() => setShowPasswordStrength(true)}
+              />
+              <PasswordStrength password={passwordValue} show={showPasswordStrength} />
             </div>
 
             {/* Confirm Password */}
-            <div>
-              <label htmlFor='confirmPassword' className='block text-sm font-medium text-gray-700'>
-                Potwierdź hasło
-              </label>
-              <div className='relative mt-1'>
-                <div className='pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3'>
-                  <Lock className='h-5 w-5 text-gray-400' />
-                </div>
-                <input
-                  {...register('confirmPassword')}
-                  id='confirmPassword'
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  autoComplete='new-password'
-                  className='relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 pr-10 pl-10 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-blue-500 focus:ring-blue-500 focus:outline-none sm:text-sm'
-                  placeholder='Powtórz hasło'
-                />
+            <AnimatedInput
+              {...register('confirmPassword')}
+              label='Potwierdź hasło'
+              type={showConfirmPassword ? 'text' : 'password'}
+              placeholder='Powtórz hasło'
+              icon={<Lock className='h-5 w-5' />}
+              rightIcon={
                 <button
                   type='button'
-                  className='absolute inset-y-0 right-0 flex items-center pr-3'
+                  className='text-gray-400 transition-colors hover:text-gray-600'
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
-                  {showConfirmPassword ? (
-                    <EyeOff className='h-5 w-5 text-gray-400 hover:text-gray-600' />
-                  ) : (
-                    <Eye className='h-5 w-5 text-gray-400 hover:text-gray-600' />
-                  )}
+                  {showConfirmPassword ? <EyeOff className='h-5 w-5' /> : <Eye className='h-5 w-5' />}
                 </button>
-              </div>
-              {errors.confirmPassword && <p className='mt-1 text-sm text-red-600'>{errors.confirmPassword.message}</p>}
-            </div>
+              }
+              error={errors.confirmPassword?.message}
+              autoComplete='new-password'
+            />
           </div>
 
           {/* Terms */}
@@ -196,11 +173,14 @@ export default function SignUpPage() {
             <button
               type='submit'
               disabled={isLoading}
-              className='group relative flex w-full justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50'>
+              className='group relative flex w-full justify-center rounded-md border border-transparent bg-blue-600 px-4 py-3 text-sm font-medium text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-lg focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none'>
               {isLoading ? (
                 <div className='h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent' />
               ) : (
-                'Załóż konto'
+                <>
+                  <UserPlus className='mr-2 h-5 w-5' />
+                  Załóż konto
+                </>
               )}
             </button>
           </div>

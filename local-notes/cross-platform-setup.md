@@ -156,6 +156,7 @@ npm run dev          # Start dev server
 npm run dev:turbo    # Start dev server with Turbopack
 npm run build        # Build for production
 npm run start        # Start production server
+npm run analyze      # Analyze bundle size
 ```
 
 ### Code Quality
@@ -178,6 +179,7 @@ npm test             # Run tests
 npm run test:watch   # Run tests in watch mode
 npm run test:coverage # Run tests with coverage
 npm run test:ci      # Run tests for CI (no watch)
+npm run test:update  # Update snapshots
 ```
 
 ### Cleanup

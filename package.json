@@ -67,6 +67,7 @@
   "private": true,
   "author": "AKNETH Studio Katarzyna Pawłowska-Malesa",
   "license": "AGPL-3.0-only",
+  "homepage": "https://invoiceforge.pl",
   "repository": {
     "type": "git",
     "url": "https://github.com/aknethstudio-stack/invoiceforge"
@@ -74,15 +75,19 @@
   "funding": [
     {
       "type": "commercial",
-      "url": "https://invoiceforge.com/commercial"
+      "url": "https://invoiceforge.pl/pricing"
     },
     {
       "type": "patreon",
-      "url": "https://www.patreon.com/cw/AKNETHStudio"
+      "url": "https://www.patreon.com/AKNETHStudio"
     },
     {
       "type": "github",
       "url": "https://github.com/sponsors/aknethstudio-stack"
+    },
+    {
+      "type": "individual",
+      "url": "https://akneth-studio.vercel.app"
     }
   ],
   "type": "module",

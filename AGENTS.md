@@ -4,8 +4,8 @@ This document provides context and guidelines for AI assistants working on the I
 
 ## 📋 Project Overview
 
-**InvoiceForge** is a modern SaaS invoicing application built with Next.js 14, TypeScript, Tailwind
-CSS, and Supabase.
+**InvoiceForge** is a modern SaaS invoicing application built with Next.js 15, React 19, TypeScript,
+Tailwind CSS, and Supabase.
 
 - **Goal**: Professional invoicing system for Polish market
 - **Architecture**: Multi-tenant SaaS with Row Level Security
@@ -17,21 +17,23 @@ CSS, and Supabase.
 
 ### Frontend
 
-- **Framework**: Next.js 14 (App Router)
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS v4 + SCSS
-- **Components**: Headless UI, Radix UI
-- **Forms**: React Hook Form + Zod validation
-- **State**: TanStack Query (React Query)
-- **Icons**: Lucide React
+- **Framework**: Next.js 15.5.4 (App Router)
+- **Runtime**: React 19.1.1
+- **Language**: TypeScript 5.9.2
+- **Styling**: Tailwind CSS v4.1.13 + SCSS
+- **Components**: Headless UI 2.2.9, React Icons 5.5.0
+- **Forms**: React Hook Form 7.63.0 + Zod 4.1.11 validation
+- **State**: TanStack Query 5.90.2 (React Query)
+- **PDF Generation**: jsPDF 3.0.3 + jsPDF-AutoTable 5.0.2
 
 ### Backend & Database
 
 - **Database**: Supabase PostgreSQL
-- **Auth**: Supabase Auth
+- **Auth**: Supabase Auth (via @supabase/ssr 0.7.0)
 - **Real-time**: Supabase Realtime subscriptions
 - **Storage**: Supabase Storage (for file attachments)
-- **API**: Next.js API routes + Supabase client
+- **API**: Next.js 15 API routes + Supabase client 2.58.0
+- **Security**: hCaptcha 1.12.1 for bot protection
 
 ### Infrastructure
 
@@ -43,13 +45,14 @@ CSS, and Supabase.
 
 ### Development Tools
 
-- **Editor**: Zed (Rust-based, lightweight)
-- **Node Version**: 22.x LTS (managed via nvm + Oh My Zsh plugin)
-- **Package Manager**: npm
-- **Linting**: ESLint + Prettier
-- **Testing**: Jest + Testing Library
-- **Git Hooks**: Husky + lint-staged
+- **Editor**: Zed (Rust-based, lightweight) + VS Code support
+- **Node Version**: 22.x LTS (managed via nvm/nvm-windows)
+- **Package Manager**: npm >=10.x
+- **Linting**: ESLint 9.36.0 + Prettier 3.6.2
+- **Testing**: Jest 30.1.3 + Testing Library 16.3.0
+- **Git Hooks**: Husky 9.1.7 + lint-staged 16.2.1
 - **CI/CD**: GitHub Actions
+- **Security**: Snyk integration for vulnerability scanning
 
 ## 🗄️ Database Schema
 
@@ -85,17 +88,17 @@ CSS, and Supabase.
 ### Recommended Workflow
 
 ```bash
-# Production-mode development (recommended for low-end hardware)
+# Production-mode development (required for hardware constraints)
 npm run build && npm run start
+
+# Quality checks before commit
+npm run check  # Runs type-check + lint + stylelint + test:ci
 
 # Traditional dev mode (heavy, avoid on weak hardware)
 npm run dev
 
-# Type checking
-npm run type-check
-
-# Testing
-npm run test
+# Alternative with Turbopack (experimental)
+npm run dev:turbo
 ```
 
 ## 🚨 Important Context for AI Agents
@@ -241,7 +244,14 @@ const result = calc(a, b); // calculate invoice total
 - npm run type-check - TypeScript validation
 - npm run lint - ESLint checks
 - npm run format - Prettier formatting
+- npm run stylelint - Stylelint for CSS/SCSS
 - commitlint - Commit message validation
+
+**Pre-build hooks** ensure quality:
+
+- Type checking before development and build
+- All checks run before build (check script)
+- Test suite must pass before build
 
 ### Database Operations Standards
 
@@ -249,3 +259,32 @@ const result = calc(a, b); // calculate invoice total
 - **Validate with Zod** schemas before database operations
 - **Handle errors gracefully** with user-friendly messages
 - **Use transactions** for multi-table operations
+
+### Key Patterns
+
+#### Validation with Zod
+
+```typescript
+// Pattern: Transform + validate in schemas
+vat_id: z.string()
+  .optional()
+  .transform((val) => val?.replace(/[-\s]/g, '') || undefined)
+  .refine(validateNIP, { message: 'Nieprawidłowy format NIP' });
+```
+
+#### Supabase Hooks Usage
+
+```typescript
+// Use custom hooks from @/hooks/use-supabase.ts
+const { user, loading, signOut } = useAuth();
+const supabase = useSupabase();
+
+// Real-time subscriptions
+const { data } = useSupabaseSubscription('invoices', `owner_id=eq.${user.id}`);
+```
+
+#### Form Handling
+
+- **React Hook Form** + **Zod resolvers** for validation
+- Error messages in Polish
+- Transform data before validation (e.g., clean NIP formatting)

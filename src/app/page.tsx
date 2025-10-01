@@ -18,17 +18,19 @@ export default function Page() {
               Fakturowanie dla
               <span className='text-brand'> profesjonalistów</span>
             </h1>
-            <p className='mx-auto mt-6 max-w-2xl text-lg leading-8 text-gray-600'>
+            <p className='mx-auto mt-6 max-w-2xl text-base leading-7 text-gray-600 sm:text-lg sm:leading-8'>
               Twórz faktury, zarządzaj klientami i śledź płatności w jednym miejscu. Zgodne z polskim prawem, szybkie i
               intuicyjne.
             </p>
-            <div className='mt-10 flex items-center justify-center gap-x-6'>
+            <div className='mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row sm:gap-x-6'>
               <Link
                 href='/auth/signup'
-                className='bg-brand hover:bg-brand-600 focus-visible:outline-brand rounded-md px-6 py-3 text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2'>
+                className='bg-brand hover:bg-brand-600 focus-visible:outline-brand w-full rounded-md px-6 py-3 text-center text-sm font-semibold text-white shadow-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 sm:w-auto'>
                 Rozpocznij za darmo
               </Link>
-              <Link href='/demo' className='text-sm leading-6 font-semibold text-gray-900'>
+              <Link
+                href='/demo'
+                className='hover:text-brand text-sm leading-6 font-semibold text-gray-900 transition-colors'>
                 Zobacz demo <span aria-hidden='true'>→</span>
               </Link>
             </div>
