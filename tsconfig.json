@@ -36,10 +36,8 @@
     "moduleDetection": "force",
     "skipLibCheck": true,
     "allowJs": true,
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
-      "@/lib": ["src/lib/*"]
+      "@/*": ["./src/*"]
     },
     "resolveJsonModule": true,
     "noEmit": true,

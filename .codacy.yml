@@ -1,0 +1,79 @@
+---
+# Codacy Configuration
+engines:
+  # JavaScript/TypeScript analysis
+  eslint:
+    enabled: true
+    exclude_paths:
+      - "**/*.test.ts"
+      - "**/*.test.tsx"
+      - "__tests__/**"
+      - "coverage/**"
+      - ".next/**"
+      - "node_modules/**"
+
+  # CSS/SCSS analysis
+  stylelint:
+    enabled: true
+    exclude_paths:
+      - "coverage/**"
+      - ".next/**"
+      - "node_modules/**"
+
+  # Security analysis
+  bandit:
+    enabled: false
+
+  # Metrics
+  metrics:
+    enabled: true
+
+# File exclusions
+exclude_paths:
+  - "**/*.d.ts"
+  - "**/*.config.*"
+  - "**/*.test.*"
+  - "__tests__/**"
+  - "coverage/**"
+  - ".next/**"
+  - "node_modules/**"
+  - "scripts/**"
+  - "public/**"
+  - "*.md"
+  - "*.json"
+  - "*.yml"
+  - "*.yaml"
+
+# Coverage configuration
+coverage:
+  # Don't fail on missing coverage data
+  force_coverage_parser: true
+
+  # Minimum coverage thresholds
+  range:
+    - 50..60 # Orange
+    - 60..80 # Yellow
+    - 80..100 # Green
+
+# Duplication detection
+duplication:
+  # Minimum lines for duplication detection
+  min_lines: 5
+
+  # Languages to check for duplication
+  languages:
+    - typescript
+    - javascript
+    - css
+
+# Issue patterns to ignore
+patterns:
+  # Allow console.log in development
+  - name: "Console calls"
+    pattern: "console\\.(log|warn|error|info|debug)"
+    severity: "minor"
+
+  # Allow TODO comments
+  - name: "TODO comments"
+    pattern: "TODO:"
+    severity: "info"

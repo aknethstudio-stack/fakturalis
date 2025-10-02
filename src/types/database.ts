@@ -130,6 +130,13 @@ export type Database = {
           total_vat: number;
           total_gross: number;
           notes: string | null;
+          ksef_id: string | null;
+          ksef_status: Database['public']['Enums']['ksef_submission_status'];
+          ksef_reference_number: string | null;
+          ksef_submission_id: string | null;
+          ksef_submitted_at: string | null;
+          ksef_upo_number: string | null;
+          ksef_processing_code: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -146,6 +153,13 @@ export type Database = {
           total_vat?: number;
           total_gross?: number;
           notes?: string | null;
+          ksef_id?: string | null;
+          ksef_status?: Database['public']['Enums']['ksef_submission_status'];
+          ksef_reference_number?: string | null;
+          ksef_submission_id?: string | null;
+          ksef_submitted_at?: string | null;
+          ksef_upo_number?: string | null;
+          ksef_processing_code?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -162,6 +176,13 @@ export type Database = {
           total_vat?: number;
           total_gross?: number;
           notes?: string | null;
+          ksef_id?: string | null;
+          ksef_status?: Database['public']['Enums']['ksef_submission_status'];
+          ksef_reference_number?: string | null;
+          ksef_submission_id?: string | null;
+          ksef_submitted_at?: string | null;
+          ksef_upo_number?: string | null;
+          ksef_processing_code?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -258,9 +279,198 @@ export type Database = {
           },
         ];
       };
+      ksef_submissions: {
+        Row: {
+          id: string;
+          owner_id: string;
+          invoice_id: string;
+          submission_id: string;
+          reference_number: string | null;
+          status: Database['public']['Enums']['ksef_submission_status'];
+          xml_content: string | null;
+          xml_hash: string | null;
+          response_data: Record<string, unknown> | null;
+          error_message: string | null;
+          error_code: string | null;
+          processing_code: string | null;
+          processing_description: string | null;
+          upo_number: string | null;
+          upo_content: string | null;
+          acquisition_timestamp: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          owner_id: string;
+          invoice_id: string;
+          submission_id: string;
+          reference_number?: string | null;
+          status?: Database['public']['Enums']['ksef_submission_status'];
+          xml_content?: string | null;
+          xml_hash?: string | null;
+          response_data?: Record<string, unknown> | null;
+          error_message?: string | null;
+          error_code?: string | null;
+          processing_code?: string | null;
+          processing_description?: string | null;
+          upo_number?: string | null;
+          upo_content?: string | null;
+          acquisition_timestamp?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          owner_id?: string;
+          invoice_id?: string;
+          submission_id?: string;
+          reference_number?: string | null;
+          status?: Database['public']['Enums']['ksef_submission_status'];
+          xml_content?: string | null;
+          xml_hash?: string | null;
+          response_data?: Record<string, unknown> | null;
+          error_message?: string | null;
+          error_code?: string | null;
+          processing_code?: string | null;
+          processing_description?: string | null;
+          upo_number?: string | null;
+          upo_content?: string | null;
+          acquisition_timestamp?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'ksef_submissions_owner_id_fkey';
+            columns: ['owner_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'ksef_submissions_invoice_id_fkey';
+            columns: ['invoice_id'];
+            isOneToOne: false;
+            referencedRelation: 'invoices';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      ksef_sessions: {
+        Row: {
+          id: string;
+          owner_id: string;
+          session_id: string;
+          session_token: string;
+          expires_at: string;
+          environment: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          owner_id: string;
+          session_id: string;
+          session_token: string;
+          expires_at: string;
+          environment?: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          owner_id?: string;
+          session_id?: string;
+          session_token?: string;
+          expires_at?: string;
+          environment?: string;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'ksef_sessions_owner_id_fkey';
+            columns: ['owner_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      ksef_config: {
+        Row: {
+          id: string;
+          owner_id: string;
+          environment: string;
+          certificate_content: string | null;
+          certificate_password: string | null;
+          identifier: string | null;
+          active: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          owner_id: string;
+          environment?: string;
+          certificate_content?: string | null;
+          certificate_password?: string | null;
+          identifier?: string | null;
+          active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          owner_id?: string;
+          environment?: string;
+          certificate_content?: string | null;
+          certificate_password?: string | null;
+          identifier?: string | null;
+          active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'ksef_config_owner_id_fkey';
+            columns: ['owner_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
     };
     Views: {
-      [_ in never]: never;
+      invoices_with_ksef: {
+        Row: {
+          id: string;
+          owner_id: string;
+          client_id: string;
+          number: string;
+          status: Database['public']['Enums']['invoice_status'];
+          issue_date: string;
+          due_date: string;
+          currency: string;
+          subtotal_net: number;
+          total_vat: number;
+          total_gross: number;
+          notes: string | null;
+          ksef_id: string | null;
+          ksef_status: Database['public']['Enums']['ksef_submission_status'];
+          ksef_reference_number: string | null;
+          ksef_submission_id: string | null;
+          ksef_submitted_at: string | null;
+          ksef_upo_number: string | null;
+          ksef_processing_code: string | null;
+          created_at: string;
+          updated_at: string;
+          latest_submission_id: string | null;
+          latest_response_data: Record<string, unknown> | null;
+          latest_error_message: string | null;
+          latest_acquisition_timestamp: string | null;
+          latest_upo_number: string | null;
+        };
+      };
     };
     Functions: {
       [_ in never]: never;
@@ -268,6 +478,7 @@ export type Database = {
     Enums: {
       invoice_status: 'draft' | 'issued' | 'sent' | 'paid' | 'overdue' | 'voided' | 'cancelled';
       payment_status: 'pending' | 'completed' | 'failed' | 'refunded';
+      ksef_submission_status: 'not_sent' | 'pending' | 'accepted' | 'rejected' | 'error';
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -294,6 +505,21 @@ export type InvoiceItemUpdate = Database['public']['Tables']['invoice_items']['U
 
 export type InvoiceStatus = Database['public']['Enums']['invoice_status'];
 export type PaymentStatus = Database['public']['Enums']['payment_status'];
+export type KSeFSubmissionStatus = Database['public']['Enums']['ksef_submission_status'];
+
+export type KSeFSubmission = Database['public']['Tables']['ksef_submissions']['Row'];
+export type KSeFSubmissionInsert = Database['public']['Tables']['ksef_submissions']['Insert'];
+export type KSeFSubmissionUpdate = Database['public']['Tables']['ksef_submissions']['Update'];
+
+export type KSeFSession = Database['public']['Tables']['ksef_sessions']['Row'];
+export type KSeFSessionInsert = Database['public']['Tables']['ksef_sessions']['Insert'];
+export type KSeFSessionUpdate = Database['public']['Tables']['ksef_sessions']['Update'];
+
+export type KSeFConfig = Database['public']['Tables']['ksef_config']['Row'];
+export type KSeFConfigInsert = Database['public']['Tables']['ksef_config']['Insert'];
+export type KSeFConfigUpdate = Database['public']['Tables']['ksef_config']['Update'];
+
+export type InvoiceWithKSeF = Database['public']['Views']['invoices_with_ksef']['Row'];
 
 // Extended types with relationships
 export type InvoiceWithClient = Invoice & {

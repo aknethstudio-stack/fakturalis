@@ -42,6 +42,8 @@
     "analyze:browser": "cross-env BUNDLE_ANALYZE=browser npm run build",
     "dev:clean": "npm run clean && npm run dev",
     "test:update": "jest --updateSnapshot",
+    "coverage:upload": "node scripts/upload-coverage.mjs",
+    "coverage:codacy": "npm run test:ci && npm run coverage:upload",
     "deps:check": "npm outdated",
     "deps:update": "npm update"
   },
@@ -67,6 +69,7 @@
   "private": true,
   "author": "AKNETH Studio Katarzyna Pawłowska-Malesa",
   "license": "AGPL-3.0-only",
+  "homepage": "https://invoiceforge.pl",
   "repository": {
     "type": "git",
     "url": "https://github.com/aknethstudio-stack/invoiceforge"
@@ -74,15 +77,19 @@
   "funding": [
     {
       "type": "commercial",
-      "url": "https://invoiceforge.com/commercial"
+      "url": "https://invoiceforge.pl/pricing"
     },
     {
       "type": "patreon",
-      "url": "https://www.patreon.com/cw/AKNETHStudio"
+      "url": "https://www.patreon.com/AKNETHStudio"
     },
     {
       "type": "github",
       "url": "https://github.com/sponsors/aknethstudio-stack"
+    },
+    {
+      "type": "individual",
+      "url": "https://akneth-studio.vercel.app"
     }
   ],
   "type": "module",
@@ -90,11 +97,14 @@
     "@hcaptcha/react-hcaptcha": "^1.12.1",
     "@headlessui/react": "^2.2.9",
     "@hookform/resolvers": "^5.2.2",
+    "@sentry/nextjs": "^10.17.0",
     "@supabase/auth-helpers-nextjs": "^0.10.0",
     "@supabase/auth-helpers-react": "^0.5.0",
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.58.0",
     "@tanstack/react-query": "^5.90.2",
+    "@vercel/analytics": "^1.5.0",
+    "@vercel/speed-insights": "^1.2.0",
     "clsx": "^2.1.1",
     "jspdf": "^3.0.3",
     "jspdf-autotable": "^5.0.2",
