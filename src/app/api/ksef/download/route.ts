@@ -7,6 +7,7 @@ import { ksefClient } from '@/lib/ksef/client';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
   try {
@@ -57,7 +58,12 @@ export async function GET(request: NextRequest) {
       .eq('id', submission.id);
 
     if (updateError) {
-      console.error('Failed to save UPO content:', updateError);
+      logger.error('Failed to save UPO content', updateError, {
+        endpoint: '/api/ksef/download',
+        referenceNumber,
+        submissionId: submission.id,
+        userId: user.id,
+      });
     }
 
     // Decode Base64 UPO content for download
@@ -72,7 +78,10 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('KSeF UPO download error:', error);
+    logger.error('KSeF UPO download error', error, {
+      endpoint: '/api/ksef/download',
+      method: 'GET',
+    });
 
     return NextResponse.json(
       {

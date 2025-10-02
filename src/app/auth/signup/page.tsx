@@ -4,6 +4,7 @@ import AnimatedInput from '@/components/ui/AnimatedInput';
 import HCaptchaComponent, { type HCaptchaRef } from '@/components/ui/HCaptcha';
 import PasswordStrength from '@/components/ui/PasswordStrength';
 import { useAuth } from '@/hooks/use-supabase';
+import { logger } from '@/lib/logger';
 import { signupSchema, type SignupFormData } from '@/lib/validations/auth';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
@@ -60,7 +61,10 @@ export default function SignUpPage() {
       await signUpWithEmail(data.email, data.password, { captchaToken });
       router.push('/auth/login?message=Sprawdź swój email i potwierdź konto');
     } catch (error) {
-      console.error('Signup error:', error);
+      logger.error('Signup error', error, {
+        email: data.email,
+        component: 'SignUpPage',
+      });
       setError('root', {
         type: 'manual',
         message: error instanceof Error ? error.message : 'Błąd podczas rejestracji',

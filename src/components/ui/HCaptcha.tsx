@@ -1,7 +1,8 @@
 'use client';
 
+import { logger } from '@/lib/logger';
 import HCaptcha from '@hcaptcha/react-hcaptcha';
-import { useRef, forwardRef, useImperativeHandle } from 'react';
+import { forwardRef, useImperativeHandle, useRef } from 'react';
 
 interface HCaptchaComponentProps {
   onVerify: (token: string) => void;
@@ -28,7 +29,7 @@ const HCaptchaComponent = forwardRef<HCaptchaRef, HCaptchaComponentProps>(({ onV
   }));
 
   if (!siteKey) {
-    console.warn('hCaptcha site key not found in environment variables');
+    logger.warn('hCaptcha site key not found in environment variables');
     return null;
   }
 

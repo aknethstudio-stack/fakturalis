@@ -1,6 +1,7 @@
 'use client';
 
 import { useAuth } from '@/hooks/use-supabase';
+import { logger } from '@/lib/logger';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { BsBoxArrowRight as LogOut } from 'react-icons/bs';
@@ -15,7 +16,7 @@ export default function LogoutPage() {
         await signOut();
         router.push('/auth/login?message=Zostałeś wylogowany');
       } catch (error) {
-        console.error('Logout error:', error);
+        logger.error('Logout error', error, { component: 'LogoutPage' });
         router.push('/auth/login?error=logout_error');
       }
     };

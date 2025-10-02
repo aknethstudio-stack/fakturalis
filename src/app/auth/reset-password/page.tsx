@@ -1,6 +1,7 @@
 'use client';
 
 import { useAuth } from '@/hooks/use-supabase';
+import { logger } from '@/lib/logger';
 import { resetPasswordSchema, type ResetPasswordFormData } from '@/lib/validations/auth';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
@@ -28,7 +29,10 @@ export default function ResetPasswordPage() {
       await resetPassword(data.email);
       setEmailSent(true);
     } catch (error) {
-      console.error('Reset password error:', error);
+      logger.error('Reset password error', error, {
+        email: data.email,
+        component: 'ResetPasswordPage',
+      });
       setError('root', {
         type: 'manual',
         message: error instanceof Error ? error.message : 'Błąd podczas wysyłania emaila',

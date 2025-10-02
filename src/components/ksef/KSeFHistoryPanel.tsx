@@ -5,6 +5,7 @@
 
 'use client';
 
+import { logger } from '@/lib/logger';
 import type { KSeFSubmission } from '@/types/database';
 import { clsx } from 'clsx';
 import { useEffect, useState } from 'react';
@@ -29,7 +30,7 @@ export default function KSeFHistoryPanel({ invoiceId, className }: KSeFHistoryPa
 
   useEffect(() => {
     fetchSubmissions();
-  }, [invoiceId]);
+  }, [invoiceId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchSubmissions = async () => {
     try {
@@ -43,7 +44,10 @@ export default function KSeFHistoryPanel({ invoiceId, className }: KSeFHistoryPa
       // For now, mock data
       setSubmissions([]);
     } catch (error) {
-      console.error('Failed to fetch KSeF submissions:', error);
+      logger.error('Failed to fetch KSeF submissions', error, {
+        component: 'KSeFHistoryPanel',
+        invoiceId,
+      });
     } finally {
       setIsLoading(false);
     }

@@ -8,6 +8,7 @@ import type { KSeFInvoiceXML } from '@/lib/ksef/types';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
   try {
@@ -120,7 +121,12 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (submissionError) {
-      console.error('Failed to save KSeF submission:', submissionError);
+      logger.error('Failed to save KSeF submission', submissionError, {
+        endpoint: '/api/ksef/submit',
+        invoiceId,
+        submissionId: submission.submissionId,
+        userId: user.id,
+      });
       return NextResponse.json({ error: 'Błąd podczas zapisywania submisji KSeF' }, { status: 500 });
     }
 
@@ -134,7 +140,10 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('KSeF submission error:', error);
+    logger.error('KSeF submission error', error, {
+      endpoint: '/api/ksef/submit',
+      method: 'POST',
+    });
 
     return NextResponse.json(
       {

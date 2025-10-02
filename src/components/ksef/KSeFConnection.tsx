@@ -5,6 +5,7 @@
 
 'use client';
 
+import { logger } from '@/lib/logger';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -56,7 +57,7 @@ export default function KSeFConnection() {
         });
       }
     } catch (error) {
-      console.error('Failed to check KSeF connection:', error);
+      logger.error('Failed to check KSeF connection', error, { component: 'KSeFConnection' });
     }
   };
 
@@ -85,7 +86,7 @@ export default function KSeFConnection() {
       }
     } catch (error) {
       setError('Błąd sieci podczas łączenia z KSeF');
-      console.error('KSeF connection error:', error);
+      logger.error('KSeF connection error', error, { component: 'KSeFConnection' });
     } finally {
       setIsLoading(false);
     }

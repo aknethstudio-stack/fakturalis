@@ -1,6 +1,7 @@
 'use client';
 
 import { useAuth } from '@/hooks/use-supabase';
+import { logger } from '@/lib/logger';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { BsBoxArrowRight, BsChevronDown, BsGear, BsPerson, BsShield } from 'react-icons/bs';
@@ -33,7 +34,7 @@ export default function AccountDropdown() {
       await signOut();
       setIsOpen(false);
     } catch (error) {
-      console.error('Sign out error:', error);
+      logger.error('Sign out error', error, { component: 'AccountDropdown' });
     }
   };
 

@@ -7,6 +7,7 @@ import { ksefClient } from '@/lib/ksef/client';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
   try {
@@ -66,7 +67,12 @@ export async function GET(request: NextRequest) {
       .eq('id', submission.id);
 
     if (updateError) {
-      console.error('Failed to update KSeF submission status:', updateError);
+      logger.error('Failed to update KSeF submission status', updateError, {
+        endpoint: '/api/ksef/status',
+        referenceNumber,
+        submissionId: submission.id,
+        userId: user.id,
+      });
     }
 
     return NextResponse.json({
@@ -82,7 +88,10 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('KSeF status check error:', error);
+    logger.error('KSeF status check error', error, {
+      endpoint: '/api/ksef/status',
+      method: 'GET',
+    });
 
     return NextResponse.json(
       {

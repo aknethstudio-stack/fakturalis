@@ -7,6 +7,7 @@ import { ksefClient } from '@/lib/ksef/client';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
 export async function POST(request: NextRequest) {
   try {
@@ -50,7 +51,11 @@ export async function POST(request: NextRequest) {
       });
 
       if (saveError) {
-        console.error('Failed to save KSeF config:', saveError);
+        logger.error('Failed to save KSeF config', saveError, {
+          endpoint: '/api/ksef/connect',
+          userId: user.id,
+          nip: cleanNIP,
+        });
         return NextResponse.json({ error: 'Błąd podczas zapisywania konfiguracji KSeF' }, { status: 500 });
       }
 
@@ -74,7 +79,10 @@ export async function POST(request: NextRequest) {
       );
     }
   } catch (error) {
-    console.error('KSeF connection error:', error);
+    logger.error('KSeF connection error', error, {
+      endpoint: '/api/ksef/connect',
+      method: 'POST',
+    });
 
     return NextResponse.json(
       {
@@ -130,7 +138,10 @@ export async function GET(_request: NextRequest) {
         : null,
     });
   } catch (error) {
-    console.error('KSeF config check error:', error);
+    logger.error('KSeF config check error', error, {
+      endpoint: '/api/ksef/connect',
+      method: 'GET',
+    });
 
     return NextResponse.json(
       {

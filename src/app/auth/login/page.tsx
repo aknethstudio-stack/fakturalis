@@ -2,6 +2,7 @@
 
 import HCaptchaComponent, { type HCaptchaRef } from '@/components/ui/HCaptcha';
 import { useAuth } from '@/hooks/use-supabase';
+import { logger } from '@/lib/logger';
 import { loginSchema, type LoginFormData } from '@/lib/validations/auth';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
@@ -49,7 +50,11 @@ function LoginForm() {
       await signInWithEmail(data.email, data.password, { captchaToken });
       router.push(redirectTo);
     } catch (error) {
-      console.error('Login error:', error);
+      logger.error('Login error', error, {
+        email: data.email,
+        component: 'LoginForm',
+        redirectTo,
+      });
       setError('root', {
         type: 'manual',
         message: error instanceof Error ? error.message : 'Błąd podczas logowania',

@@ -2,6 +2,7 @@ import type { Database } from '@/lib/supabase';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
 /**
  * Handles user sign out
@@ -34,7 +35,7 @@ export async function POST() {
     // Return success response
     return NextResponse.json({ message: 'Wylogowano pomyślnie' }, { status: 200 });
   } catch (error) {
-    console.error('Sign out error:', error);
+    logger.error('Sign out error', error, { endpoint: '/api/auth/signout' });
     return NextResponse.json({ error: 'Błąd podczas wylogowywania' }, { status: 500 });
   }
 }

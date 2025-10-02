@@ -2,6 +2,7 @@ import type { Database } from '@/lib/supabase';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from '@/lib/logger';
 
 /**
  * Handles Supabase auth callback
@@ -38,7 +39,10 @@ export async function GET(request: NextRequest) {
       // Exchange the auth code for a session
       await supabase.auth.exchangeCodeForSession(code);
     } catch (error) {
-      console.error('Error exchanging code for session:', error);
+      logger.error('Error exchanging code for session', error, {
+        endpoint: '/api/auth/callback',
+        hasCode: !!code,
+      });
       // Redirect to login with error
       return NextResponse.redirect(new URL('/auth/login?error=auth_error', request.url));
     }
