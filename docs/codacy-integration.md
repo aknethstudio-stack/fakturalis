@@ -165,7 +165,32 @@ npm run stylelint:fix
 npm run check
 ```
 
-## 📚 Resources
+## � Security & Branch Protection
+
+Codacy monitoruje również bezpieczeństwo repozytorium. Aby uzyskać najwyższą ocenę:
+
+### Required Security Settings
+
+1. **Branch Protection Rules** - zobacz
+   [GitHub Branch Protection Setup](./github-branch-protection.md)
+2. **Required Status Checks** - CI musi przejść przed merge
+3. **Code Review Requirements** - minimum 1 reviewer dla master
+
+### Quick Setup
+
+```bash
+# Navigate to repository settings
+# https://github.com/aknethstudio-stack/invoiceforge/settings/branches
+
+# Add protection rule for 'master' branch with:
+# - Require pull request reviews (1 approver)
+# - Require status checks (test job)
+# - Include administrators
+```
+
+⚠️ **Warning**: Bez branch protection Codacy będzie pokazywać security alerts!
+
+## �📚 Resources
 
 - [Codacy Documentation](https://docs.codacy.com/)
 - [Coverage Reporter](https://github.com/codacy/codacy-coverage-reporter)

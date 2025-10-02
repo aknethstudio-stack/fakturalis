@@ -190,11 +190,19 @@ npm run release:minor # Minor version
 
 ## 📖 Dokumentacja
 
+### Rozwój i Konfiguracja
+
 - 📋 [**AGENTS.md**](./AGENTS.md) - Przewodnik dla AI asystentów
-- 🔧 [**Cross-Platform Setup**](./local-notes/cross-platform-setup.md) - Instalacja na różnych
-  systemach
 - 🔐 [**Auth System**](./docs/auth-system.md) - System uwierzytelniania
 - 🛡️ [**hCaptcha Setup**](./docs/hcaptcha-setup.md) - Konfiguracja zabezpieczeń
+- 📊 [**Codacy Integration**](./docs/codacy-integration.md) - Analiza jakości kodu
+- 🔒 [**Branch Protection**](./docs/github-branch-protection.md) - Bezpieczeństwo repozytorium
+
+### Techniczne
+
+- 🗄️ [**Database Schema**](./docs/database-schema.md) - Struktura bazy danych
+- 🧪 [**Testing Guide**](./docs/testing.md) - Testowanie i utilities
+- 🌿 [**Git Workflow**](./docs/git-workflow.md) - Git Flow i konwencje
 
 ## 🤝 Współpraca
 
@@ -221,7 +229,7 @@ npm run release:minor # Minor version
 
 **AKNETH Studio - Katarzyna Pawłowska-Malesa**  
 🌐 [Portfolio](https://akneth-studio.vercel.app)  
-📧 akneth.studio@gmail.com
+📧 <akneth.studio@gmail.com>
 
 ---
 
@@ -234,4 +242,6 @@ Jeśli InvoiceForge pomaga Ci w prowadzeniu biznesu, rozważ wsparcie rozwoju:
 - 💡 **Ideas** - proponuj nowe funkcjonalności
 - 📢 **Share** - podziel się z innymi przedsiębiorcami
 
-**Zbudujmy razem najlepszy polski system fakturowania! 🇵🇱**
+## 🇵🇱 Misja
+
+Zbudujmy razem najlepszy polski system fakturowania!

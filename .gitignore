@@ -199,7 +199,7 @@ Dockerfile.local
 .datadog/
 
 # Local development notes (keep in repo for team)
-# local-notes/
+local-notes/
 
 
 #Ignore vscode AI rules
