@@ -1,14 +1,21 @@
+import { logger } from '@/lib/logger';
+import { createRateLimitMiddleware } from '@/lib/rate-limit';
 import type { Database } from '@/lib/supabase';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
-import { logger } from '@/lib/logger';
+
+// Rate limit middleware
+const rateLimitMiddleware = createRateLimitMiddleware('auth');
 
 /**
  * Handles user sign out
  * POST /api/auth/signout
  */
-export async function POST() {
+export async function POST(request: Request) {
+  // Check rate limit
+  const rateLimitResponse = await rateLimitMiddleware(request);
+  if (rateLimitResponse) return rateLimitResponse;
   const cookieStore = await cookies();
   const supabase = createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

@@ -40,21 +40,20 @@ jobs:
         run: npm run test:ci
 
       - name: Build project
-        run: npm run build
+        run:
+          npm run build
 
-      # Coverage reporting - optional, requires secrets configuration in repository settings
+          # Coverage reporting - requires secrets to be configured in repository settings
       - name: Upload coverage to Codacy
         uses: codacy/codacy-coverage-reporter-action@v1
-        if: success()
-        continue-on-error: true
+        if: success() && secrets.CODACY_PROJECT_TOKEN != null
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           coverage-reports: ./coverage/lcov.info
 
       - name: Upload coverage to Codecov (fallback)
         uses: codecov/codecov-action@v5
-        if: success()
-        continue-on-error: true
+        if: success() && secrets.CODECOV_TOKEN != null
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage/lcov.info
