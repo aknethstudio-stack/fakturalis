@@ -9,6 +9,9 @@
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-4.1.13-06B6D4?logo=tailwindcss)](https://tailwindcss.com/)
 [![Supabase](https://img.shields.io/badge/Supabase-2.58.0-3ECF8E?logo=supabase)](https://supabase.io/)
 
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/6386ac73fb494afa81495a0ecbf6f0fb)](https://app.codacy.com/gh/aknethstudio-stack/invoiceforge/dashboard)
+[![Codacy Badge](https://app.codacy.com/project/badge/Coverage/6386ac73fb494afa81495a0ecbf6f0fb)](https://app.codacy.com/gh/aknethstudio-stack/invoiceforge/dashboard)
+
 ## ✨ Funkcjonalności
 
 ### 🏢 Zarządzanie Klientami

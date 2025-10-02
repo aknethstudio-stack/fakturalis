@@ -42,6 +42,8 @@
     "analyze:browser": "cross-env BUNDLE_ANALYZE=browser npm run build",
     "dev:clean": "npm run clean && npm run dev",
     "test:update": "jest --updateSnapshot",
+    "coverage:upload": "node scripts/upload-coverage.mjs",
+    "coverage:codacy": "npm run test:ci && npm run coverage:upload",
     "deps:check": "npm outdated",
     "deps:update": "npm update"
   },
