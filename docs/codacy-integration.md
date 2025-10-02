@@ -28,7 +28,7 @@ Codacy oferuje lepsze wsparcie dla TypeScript/React projektów niż tradycyjne n
 
 Repository jest już skonfigurowany w Codacy:
 
-- **URL**: https://app.codacy.com/gh/aknethstudio-stack/invoiceforge/dashboard
+- **URL**: <https://app.codacy.com/gh/aknethstudio-stack/invoiceforge/dashboard>
 - **Project ID**: `6386ac73fb494afa81495a0ecbf6f0fb`
 
 ### 2. Coverage Configuration
@@ -108,9 +108,10 @@ coverage:
 
 #### Dashboard Links
 
-- **Main Dashboard**: https://app.codacy.com/gh/aknethstudio-stack/invoiceforge/dashboard
-- **Coverage Details**: https://app.codacy.com/gh/aknethstudio-stack/invoiceforge/coverage/dashboard
-- **Issues Overview**: https://app.codacy.com/gh/aknethstudio-stack/invoiceforge/issues
+- **Main Dashboard**: <https://app.codacy.com/gh/aknethstudio-stack/invoiceforge/dashboard>
+- **Coverage Details**:
+  <https://app.codacy.com/gh/aknethstudio-stack/invoiceforge/coverage/dashboard>
+- **Issues Overview**: <https://app.codacy.com/gh/aknethstudio-stack/invoiceforge/issues>
 
 ## 🎯 Goals
 

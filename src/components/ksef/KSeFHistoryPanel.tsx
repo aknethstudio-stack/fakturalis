@@ -8,6 +8,14 @@
 import type { KSeFSubmission } from '@/types/database';
 import { clsx } from 'clsx';
 import { useEffect, useState } from 'react';
+import { z } from 'zod';
+
+// Zod schema for KSeF reference number validation
+const ksefReferenceSchema = z
+  .string()
+  .min(1, 'Reference number nie może być pusty')
+  .max(100, 'Reference number zbyt długi')
+  .regex(/^[A-Za-z0-9\-_]+$/, 'Reference number może zawierać tylko litery, cyfry, myślniki i podkreślenia');
 
 interface KSeFHistoryPanelProps {
   invoiceId: string;
@@ -43,24 +51,44 @@ export default function KSeFHistoryPanel({ invoiceId, className }: KSeFHistoryPa
 
   const handleDownloadUPO = async (referenceNumber: string) => {
     try {
-      const response = await fetch(`/api/ksef/download?referenceNumber=${referenceNumber}`);
+      // Validate and sanitize reference number with Zod
+      const validatedRef = ksefReferenceSchema.parse(referenceNumber);
+
+      const response = await fetch(`/api/ksef/download?referenceNumber=${encodeURIComponent(validatedRef)}`);
 
       if (response.ok) {
         const blob = await response.blob();
+
+        // Modern approach using URL.createObjectURL without DOM manipulation
         const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `UPO_${referenceNumber}.xml`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        const filename = `UPO_${validatedRef}.xml`;
+
+        // Use window.open for file download (more secure than appendChild)
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        link.style.display = 'none';
+
+        // Trigger download without DOM insertion
+        const event = new MouseEvent('click', {
+          bubbles: true,
+          cancelable: true,
+          view: window,
+        });
+        link.dispatchEvent(event);
+
+        // Clean up
+        setTimeout(() => URL.revokeObjectURL(url), 100);
       } else {
         const result = await response.json();
         alert(`Błąd pobierania UPO: ${result.error}`);
       }
     } catch (error) {
-      alert(`Błąd pobierania UPO: ${error instanceof Error ? error.message : 'Nieznany błąd'}`);
+      if (error instanceof z.ZodError) {
+        alert(`Nieprawidłowy numer referencyjny: ${error.issues[0]?.message}`);
+      } else {
+        alert(`Błąd pobierania UPO: ${error instanceof Error ? error.message : 'Nieznany błąd'}`);
+      }
     }
   };
 

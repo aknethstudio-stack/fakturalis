@@ -4,9 +4,9 @@
 
 ### 1. Utwórz konto hCaptcha
 
-1. Przejdź na https://www.hcaptcha.com/
-2. Zarejestruj się lub zaloguj
-3. Przejdź do dashboardu: https://dashboard.hcaptcha.com/
+1. Przejdź na <https://www.hcaptcha.com/>
+2. Utwórz konto lub zaloguj się
+3. Przejdź do dashboardu: <https://dashboard.hcaptcha.com/>
 
 ### 2. Utwórz nową stronę (site)
 

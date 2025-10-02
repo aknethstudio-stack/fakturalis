@@ -94,7 +94,7 @@ npm run check
 
 ## 📁 Struktura Projektu
 
-```
+```text
 invoiceforge/
 ├── src/
 │   ├── app/              # Next.js App Router - strony i API

@@ -1,5 +1,8 @@
 # InvoiceForge - AI Coding Agent Instructions
 
+> **⚠️ CRITICAL**: This project uses **Git Flow** workflow. ALWAYS use `git flow` commands instead
+> of regular git merge/checkout.
+
 ## 🏗️ Architecture Overview
 
 **Multi-tenant SaaS** invoicing app with **Row Level Security (RLS)** - every database operation
@@ -115,9 +118,17 @@ src/
 
 ## 🔄 Git Workflow
 
-- **Git Flow**: `main` (production) + `develop` (integration)
-- **Conventional Commits**: `feat(invoice): add VAT calculation`
+**CRITICAL**: This project uses **Git Flow** - ALWAYS use `git flow` commands:
+
+- **Git Flow model**: `main` (production) + `develop` (integration)
+- **Start feature**: `git flow feature start feature-name`
+- **Finish feature**: `git flow feature finish feature-name`
+- **Start release**: `git flow release start 1.2.3`
+- **Finish release**: `git flow release finish 1.2.3`
 - **Branch naming**: `feature/INV-123-short-description`
+- **Conventional Commits**: `feat(invoice): add VAT calculation`
+
+**Never use regular git merge** - use Git Flow commands for proper workflow.
 
 ## 🎯 When Making Changes
 
