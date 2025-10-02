@@ -204,3 +204,6 @@ Dockerfile.local
 
 #Ignore vscode AI rules
 .github\instructions\codacy.instructions.md
+
+# Sentry Config File
+.env.sentry-build-plugin

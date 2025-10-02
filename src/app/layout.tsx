@@ -1,6 +1,8 @@
 import Footer from '@/components/layout/Footer';
 import Header from '@/components/layout/Header';
 import '@/styles/global.css';
+import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import type { ReactNode } from 'react';
@@ -84,6 +86,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <Header />
         <main className='flex-1'>{children}</main>
         <Footer />
+        {/* Vercel Analytics - only in production */}
+        {process.env.NODE_ENV === 'production' && (
+          <>
+            <Analytics />
+            <SpeedInsights />
+          </>
+        )}
       </body>
     </html>
   );

@@ -1,13 +1,15 @@
 'use client';
 
+import { useAuth } from '@/hooks/use-supabase';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
-import { BsChevronDown, BsPerson } from 'react-icons/bs';
+import { BsBoxArrowRight, BsChevronDown, BsGear, BsPerson, BsShield } from 'react-icons/bs';
 
 export default function AccountDropdown() {
   const [isOpen, setIsOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const { user, signOut } = useAuth();
 
   useEffect(() => {
     setIsMounted(true);
@@ -25,6 +27,15 @@ export default function AccountDropdown() {
       return () => document.removeEventListener('mousedown', handleClickOutside);
     }
   }, [isOpen]);
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      setIsOpen(false);
+    } catch (error) {
+      console.error('Sign out error:', error);
+    }
+  };
 
   if (!isMounted) {
     return (
@@ -48,12 +59,42 @@ export default function AccountDropdown() {
 
       {isOpen && (
         <div className='header__dropdown-menu'>
-          <Link href='/auth/login' className='header__dropdown-item'>
-            Zaloguj się
-          </Link>
-          <Link href='/auth/signup' className='header__dropdown-item'>
-            Zarejestruj się
-          </Link>
+          {user ? (
+            // Authenticated user menu
+            <>
+              <div className='header__dropdown-header'>
+                <span className='text-sm text-gray-600'>{user.email}</span>
+              </div>
+              <div className='header__dropdown-divider'></div>
+              <Link href='/settings/profile' className='header__dropdown-item'>
+                <BsPerson size={14} />
+                <span>Profil</span>
+              </Link>
+              <Link href='/settings/ksef' className='header__dropdown-item'>
+                <BsShield size={14} />
+                <span>KSeF</span>
+              </Link>
+              <Link href='/settings' className='header__dropdown-item'>
+                <BsGear size={14} />
+                <span>Ustawienia</span>
+              </Link>
+              <div className='header__dropdown-divider'></div>
+              <button onClick={handleSignOut} className='header__dropdown-item header__dropdown-item--button'>
+                <BsBoxArrowRight size={14} />
+                <span>Wyloguj się</span>
+              </button>
+            </>
+          ) : (
+            // Guest user menu
+            <>
+              <Link href='/auth/login' className='header__dropdown-item'>
+                Zaloguj się
+              </Link>
+              <Link href='/auth/signup' className='header__dropdown-item'>
+                Zarejestruj się
+              </Link>
+            </>
+          )}
         </div>
       )}
     </div>
