@@ -204,7 +204,7 @@ export default function ClientForm({ client, onSuccess, onCancel }: ClientFormPr
 
         <form onSubmit={handleSubmit(onSubmit)} className='space-y-6 p-6'>
           {submitError && (
-            <div className='rounded-md border border-red-200 bg-red-50 p-4'>
+            <div className='rounded-md border border-red-200 bg-red-50 p-4' role='alert'>
               <div className='flex'>
                 <BsX className='h-5 w-5 text-red-400' />
                 <div className='ml-3'>
@@ -433,7 +433,10 @@ export default function ClientForm({ client, onSuccess, onCancel }: ClientFormPr
               disabled={isLoading}
               className='flex items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50'>
               {isLoading ? (
-                <div className='mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent' />
+                <div
+                  data-testid='loading-spinner'
+                  className='mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent'
+                />
               ) : (
                 <BsCheck className='mr-2' />
               )}

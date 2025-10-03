@@ -5,7 +5,7 @@ import { logger } from '@/lib/logger';
 import type { Database } from '@/types/database';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { BsBuilding, BsEnvelope, BsGeoAlt, BsPencil, BsPlus, BsSearch, BsTelephone, BsTrash } from 'react-icons/bs';
 
 type Client = Database['public']['Tables']['clients']['Row'];
@@ -47,7 +47,7 @@ export default function ClientsPage() {
     } finally {
       setLoading(false);
     }
-  }, [user, searchTerm, supabase]);
+  }, [user, searchTerm]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleDelete = async (clientId: string) => {
     if (!user) return;

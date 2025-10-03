@@ -1,5 +1,5 @@
 import { logger } from '@/lib/logger';
-import type { Database } from '@/lib/supabase';
+import type { Database } from '@/types/database';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';

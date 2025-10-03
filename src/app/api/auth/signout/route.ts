@@ -1,6 +1,6 @@
 import { logger } from '@/lib/logger';
 import { createRateLimitMiddleware } from '@/lib/rate-limit';
-import type { Database } from '@/lib/supabase';
+import type { Database } from '@/types/database';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';

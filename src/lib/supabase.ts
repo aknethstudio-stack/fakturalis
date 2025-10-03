@@ -1,223 +1,6 @@
+import type { Database } from '@/types/database';
 import { createClientComponentClient, createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { createClient } from '@supabase/supabase-js';
-
-// Types for our database schema
-export type Database = {
-  public: {
-    Tables: {
-      clients: {
-        Row: {
-          id: string;
-          owner_id: string;
-          name: string;
-          vat_id: string | null;
-          email: string | null;
-          phone: string | null;
-          address_line1: string | null;
-          address_line2: string | null;
-          postal_code: string | null;
-          city: string | null;
-          country_code: string | null;
-          notes: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          owner_id: string;
-          name: string;
-          vat_id?: string | null;
-          email?: string | null;
-          phone?: string | null;
-          address_line1?: string | null;
-          address_line2?: string | null;
-          postal_code?: string | null;
-          city?: string | null;
-          country_code?: string | null;
-          notes?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          owner_id?: string;
-          name?: string;
-          vat_id?: string | null;
-          email?: string | null;
-          phone?: string | null;
-          address_line1?: string | null;
-          address_line2?: string | null;
-          postal_code?: string | null;
-          city?: string | null;
-          country_code?: string | null;
-          notes?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-      };
-      products: {
-        Row: {
-          id: string;
-          owner_id: string;
-          name: string;
-          sku: string | null;
-          unit: string;
-          unit_price: number;
-          vat_rate_default: number;
-          currency: string;
-          active: boolean;
-          notes: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          owner_id: string;
-          name: string;
-          sku?: string | null;
-          unit?: string;
-          unit_price?: number;
-          vat_rate_default?: number;
-          currency?: string;
-          active?: boolean;
-          notes?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          owner_id?: string;
-          name?: string;
-          sku?: string | null;
-          unit?: string;
-          unit_price?: number;
-          vat_rate_default?: number;
-          currency?: string;
-          active?: boolean;
-          notes?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-      };
-      invoices: {
-        Row: {
-          id: string;
-          owner_id: string;
-          client_id: string;
-          number: string;
-          status: 'draft' | 'issued' | 'sent' | 'paid' | 'overdue' | 'voided' | 'cancelled';
-          issue_date: string;
-          due_date: string;
-          currency: string;
-          subtotal_net: number;
-          total_vat: number;
-          total_gross: number;
-          notes: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          owner_id: string;
-          client_id: string;
-          number: string;
-          status?: 'draft' | 'issued' | 'sent' | 'paid' | 'overdue' | 'voided' | 'cancelled';
-          issue_date?: string;
-          due_date: string;
-          currency?: string;
-          subtotal_net?: number;
-          total_vat?: number;
-          total_gross?: number;
-          notes?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          owner_id?: string;
-          client_id?: string;
-          number?: string;
-          status?: 'draft' | 'issued' | 'sent' | 'paid' | 'overdue' | 'voided' | 'cancelled';
-          issue_date?: string;
-          due_date?: string;
-          currency?: string;
-          subtotal_net?: number;
-          total_vat?: number;
-          total_gross?: number;
-          notes?: string | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-      };
-      invoice_items: {
-        Row: {
-          id: string;
-          owner_id: string;
-          invoice_id: string;
-          product_id: string | null;
-          name: string;
-          quantity: number;
-          unit: string;
-          unit_price: number;
-          vat_rate: number;
-          line_net: number;
-          line_vat: number;
-          line_gross: number;
-          position: number;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          owner_id: string;
-          invoice_id: string;
-          product_id?: string | null;
-          name: string;
-          quantity?: number;
-          unit?: string;
-          unit_price?: number;
-          vat_rate?: number;
-          line_net?: number;
-          line_vat?: number;
-          line_gross?: number;
-          position?: number;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          owner_id?: string;
-          invoice_id?: string;
-          product_id?: string | null;
-          name?: string;
-          quantity?: number;
-          unit?: string;
-          unit_price?: number;
-          vat_rate?: number;
-          line_net?: number;
-          line_vat?: number;
-          line_gross?: number;
-          position?: number;
-          created_at?: string;
-          updated_at?: string;
-        };
-      };
-    };
-    Views: {
-      [_ in never]: never;
-    };
-    Functions: {
-      [_ in never]: never;
-    };
-    Enums: {
-      invoice_status: 'draft' | 'issued' | 'sent' | 'paid' | 'overdue' | 'voided' | 'cancelled';
-      payment_status: 'pending' | 'completed' | 'failed' | 'refunded';
-    };
-    CompositeTypes: {
-      [_ in never]: never;
-    };
-  };
-};
 
 // Environment variables validation
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -227,8 +10,23 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables');
 }
 
+// Singleton client instance for browser
+let clientInstance: ReturnType<typeof createClientComponentClient<Database>> | null = null;
+
 // Client-side Supabase client (for use in components)
-export const createClientSupabaseClient = () => createClientComponentClient<Database>();
+export const createClientSupabaseClient = () => {
+  if (typeof window === 'undefined') {
+    // Server-side: always create new instance
+    return createClientComponentClient<Database>();
+  }
+
+  // Client-side: use singleton
+  if (!clientInstance) {
+    clientInstance = createClientComponentClient<Database>();
+  }
+
+  return clientInstance;
+};
 
 // Server-side Supabase client (for use in server components and API routes)
 export const createServerSupabaseClient = async () => {
