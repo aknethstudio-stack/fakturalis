@@ -198,8 +198,8 @@ Dockerfile.local
 .sentry/
 .datadog/
 
-# Local development notes (keep in repo for team)
-local-notes/
+# Local development notes
+local-notes
 
 
 #Ignore vscode AI rules
