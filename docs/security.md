@@ -83,13 +83,13 @@ SENTRY_DSN=your_sentry_dsn
 - [ ] Regular security updates
 - [ ] Monitoring i alerting
 
-## Koszty
+## Usługi zewnętrzne (opcjonalne)
 
-- **Upstash Redis** (rate limiting): $0-8/miesiąc
-- **Sentry** (error monitoring): $0-26/miesiąc
-- **Supabase** (database): $0-25/miesiąc
+- **Rate limiting** - działa lokalnie lub z Redis (Upstash free tier: 10k requests/day)
+- **Error monitoring** - Sentry (free tier: 5k errors/month)
+- **Database** - Supabase (free tier: 50k requests/month)
 
-**Łączny koszt: $0-59/miesiąc**
+Bezpieczeństwo bazowe: **$0/miesiąc** - wbudowane w kod
 
 ## 📋 Implementacja
 
@@ -206,14 +206,6 @@ SENTRY_DSN=your_sentry_dsn               # Error monitoring
 - [ ] Monitoring i alerting
 - [ ] Backup procedures
 - [ ] Incident response plan
-
-## 📊 **Koszty:**
-
-1. **Upstash Redis** (rate limiting): $0-8/miesiąc
-2. **Sentry** (error monitoring): $0-26/miesiąc
-3. **Supabase** (database): $0-25/miesiąc
-
-**Łączny koszt bezpieczeństwa: $0-59/miesiąc**
 
 ## 🎯 **Priorytet implementacji:**
 
