@@ -1,0 +1,25 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "version": 2,
+  "name": "invoiceforge",
+  "buildCommand": "npm run build",
+  "installCommand": "npm install",
+  "devCommand": "npm run dev",
+  "framework": "nextjs",
+  "redirects": [
+    {
+      "source": "/view-source",
+      "destination": "https://github.com/aknethstudio-stack/invoiceforge",
+      "permanent": true
+    }
+  ],
+  "github": {
+    "enabled": true
+  },
+  "git": {
+    "silent": false
+  },
+  "regions": ["fra1"],
+  "public": true,
+  "cleanUrls": true
+}

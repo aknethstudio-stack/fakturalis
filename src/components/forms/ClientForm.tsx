@@ -2,13 +2,14 @@
 
 import { useAuth, useSupabase } from '@/hooks/use-supabase';
 import { logger } from '@/lib/logger';
+import { usePolishRegistries } from '@/lib/polish-registries';
 import { cn, validateNIP } from '@/lib/utils';
 import { formatNIP, formatPhone } from '@/lib/validations/client';
 import type { ClientFormData, Database } from '@/types/database';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { BsBuilding, BsCheck, BsEnvelope, BsGeoAlt, BsPerson, BsX } from 'react-icons/bs';
+import { BsBuilding, BsCheck, BsEnvelope, BsGeoAlt, BsPerson, BsSearch, BsX } from 'react-icons/bs';
 import { z } from 'zod';
 
 type Client = Database['public']['Tables']['clients']['Row'];
@@ -44,10 +45,13 @@ interface ClientFormProps {
 
 export default function ClientForm({ client, onSuccess, onCancel }: ClientFormProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [isRegistryLoading, setIsRegistryLoading] = useState(false);
   const [submitError, setSubmitError] = useState<string>('');
+  const [registryMessage, setRegistryMessage] = useState<string>('');
   const { user } = useAuth();
   const supabase = useSupabase();
   const router = useRouter();
+  const { searchCompany, getSourceInfo } = usePolishRegistries();
 
   const {
     register,
@@ -84,6 +88,82 @@ export default function ClientForm({ client, onSuccess, onCancel }: ClientFormPr
   const handlePhoneBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     const formatted = formatPhone(e.target.value);
     setValue('phone', formatted);
+  };
+
+  // Pobierz dane z polskich rejestrów na podstawie NIP
+  const handleRegistryLookup = async () => {
+    const nipValue = document.querySelector<HTMLInputElement>('input[name="vat_id"]')?.value;
+
+    if (!nipValue || !nipValue.trim()) {
+      setRegistryMessage('Wprowadź NIP aby wyszukać dane w polskich rejestrach');
+      return;
+    }
+
+    const cleanNip = nipValue.replace(/[-\s]/g, '');
+
+    if (!validateNIP(cleanNip)) {
+      setRegistryMessage('Nieprawidłowy format NIP');
+      return;
+    }
+
+    try {
+      setIsRegistryLoading(true);
+      setRegistryMessage('Wyszukiwanie danych w polskich rejestrach (GUS, KRS, CEIDG)...');
+
+      const companyData = await searchCompany(cleanNip);
+
+      if (!companyData) {
+        setRegistryMessage('Nie znaleziono firmy o podanym NIP w żadnym z polskich rejestrów');
+        return;
+      }
+
+      // Wypełnij formularz danymi z rejestru
+      if (companyData.name) {
+        setValue('name', companyData.name);
+      }
+
+      if (companyData.address.street && companyData.address.houseNumber) {
+        const addressLine1 = `${companyData.address.street} ${companyData.address.houseNumber}`;
+        setValue('address_line1', addressLine1);
+      }
+
+      if (companyData.address.apartmentNumber) {
+        setValue('address_line2', `m. ${companyData.address.apartmentNumber}`);
+      }
+
+      if (companyData.address.city) {
+        setValue('city', companyData.address.city);
+      }
+
+      if (companyData.address.postalCode) {
+        // Format postal code to XX-XXX if needed
+        const formattedPostalCode = companyData.address.postalCode.includes('-')
+          ? companyData.address.postalCode
+          : companyData.address.postalCode.replace(/(\d{2})(\d{3})/, '$1-$2');
+        setValue('postal_code', formattedPostalCode);
+      }
+
+      // Pobierz informacje o źródle danych
+      const sourceInfo = getSourceInfo(companyData.source);
+      const statusMessage = companyData.status === 'active' ? 'aktywna' : 'nieaktywna';
+
+      setRegistryMessage(`✅ Dane pobrane z ${sourceInfo.name} (firma ${statusMessage})`);
+
+      logger.info('Polish registries lookup successful', {
+        nip: cleanNip.substring(0, 3) + '***',
+        companyName: companyData.name,
+        source: companyData.source,
+        status: companyData.status,
+      });
+    } catch (error) {
+      logger.error('Polish registries lookup failed', error as Error, {
+        nip: cleanNip.substring(0, 3) + '***',
+        component: 'ClientForm',
+      });
+      setRegistryMessage('❌ Błąd podczas pobierania danych z polskich rejestrów');
+    } finally {
+      setIsRegistryLoading(false);
+    }
   };
 
   const onSubmit = async (data: ClientFormData) => {
@@ -245,20 +325,52 @@ export default function ClientForm({ client, onSuccess, onCancel }: ClientFormPr
                 <label htmlFor='vat_id' className='block text-sm font-medium text-gray-700'>
                   NIP
                 </label>
-                <input
-                  {...register('vat_id')}
-                  type='text'
-                  id='vat_id'
-                  onBlur={handleNIPBlur}
-                  className={cn(
-                    'mt-1 block w-full rounded-md border px-3 py-2 shadow-sm focus:outline-none sm:text-sm',
-                    errors.vat_id
-                      ? 'border-red-300 text-red-900 focus:border-red-500 focus:ring-red-500'
-                      : 'border-gray-300 focus:border-indigo-500 focus:ring-indigo-500',
-                  )}
-                  placeholder='000-000-00-00'
-                />
+                <div className='mt-1 flex rounded-md shadow-sm'>
+                  <input
+                    {...register('vat_id')}
+                    type='text'
+                    id='vat_id'
+                    onBlur={handleNIPBlur}
+                    className={cn(
+                      'block w-full rounded-l-md border px-3 py-2 focus:outline-none sm:text-sm',
+                      errors.vat_id
+                        ? 'border-red-300 text-red-900 focus:border-red-500 focus:ring-red-500'
+                        : 'border-gray-300 focus:border-indigo-500 focus:ring-indigo-500',
+                    )}
+                    placeholder='000-000-00-00'
+                  />
+                  <button
+                    type='button'
+                    onClick={handleRegistryLookup}
+                    disabled={isRegistryLoading}
+                    className={cn(
+                      'inline-flex items-center rounded-r-md border border-l-0 px-3 py-2 text-sm font-medium',
+                      'border-gray-300 bg-gray-50 text-gray-700 hover:bg-gray-100',
+                      'focus:border-indigo-500 focus:ring-indigo-500 focus:outline-none',
+                      isRegistryLoading && 'cursor-not-allowed opacity-50',
+                    )}
+                    title='Pobierz dane z polskich rejestrów (GUS, KRS, CEIDG)'>
+                    {isRegistryLoading ? (
+                      <div className='h-4 w-4 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent' />
+                    ) : (
+                      <BsSearch className='h-4 w-4' />
+                    )}
+                  </button>
+                </div>
                 {errors.vat_id && <p className='mt-1 text-sm text-red-600'>{errors.vat_id.message}</p>}
+                {registryMessage && (
+                  <p
+                    className={cn(
+                      'mt-1 text-sm',
+                      registryMessage.includes('✅')
+                        ? 'text-green-600'
+                        : registryMessage.includes('❌')
+                          ? 'text-red-600'
+                          : 'text-blue-600',
+                    )}>
+                    {registryMessage}
+                  </p>
+                )}
               </div>
 
               <div>
