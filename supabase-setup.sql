@@ -51,9 +51,9 @@ create table if not exists public.products (
   owner_id uuid not null references auth.users(id) on delete cascade,
   name text not null,
   sku text,
-  unit text default 'pcs',
+  unit text default 'szt',
   unit_price numeric(14,4) not null default 0,
-  vat_rate_default numeric(5,4) not null default 0,
+  vat_rate_default numeric(5,4) not null default 0.23,
   currency text not null default 'PLN',
   active boolean not null default true,
   notes text,
@@ -100,13 +100,13 @@ create table if not exists public.invoice_items (
   product_id uuid references public.products(id) on delete set null,
   name text not null,
   quantity numeric(14,4) not null default 1,
-  unit text default 'pcs',
+  unit text default 'szt',
   unit_price numeric(14,4) not null default 0,
-  vat_rate numeric(5,4) not null default 0,
+  vat_rate numeric(5,4) not null default 0.23,
   line_net numeric(14,2) not null default 0,
   line_vat numeric(14,2) not null default 0,
   line_gross numeric(14,2) not null default 0,
-  position int not null default 0,
+  position int not null default 1,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   constraint invoice_items_name_not_blank check (btrim(name) <> ''),
@@ -159,5 +159,169 @@ create index if not exists clients_owner_name_idx on public.clients(owner_id, na
 create index if not exists products_owner_name_idx on public.products(owner_id, name);
 create index if not exists invoices_owner_issue_date_idx on public.invoices(owner_id, issue_date);
 create index if not exists invoices_owner_status_idx on public.invoices(owner_id, status);
+
+-- DICTIONARY TABLES - For KSeF compliance and standardization
+
+-- VAT RATES TABLE - Stawki VAT zgodne z polskim prawem
+create table if not exists public.vat_rates (
+  id uuid primary key default gen_random_uuid(),
+  code text not null unique,
+  name text not null,
+  rate numeric(5,4) not null,
+  description text,
+  active boolean not null default true,
+  created_at timestamptz not null default now(),
+  constraint vat_rates_code_not_blank check (btrim(code) <> ''),
+  constraint vat_rates_name_not_blank check (btrim(name) <> ''),
+  constraint vat_rates_rate_valid check (rate >= 0 and rate <= 1)
+);
+
+-- RLS for vat_rates - PUBLIC READ-ONLY
+alter table public.vat_rates enable row level security;
+create policy vat_rates_select on public.vat_rates for select using (true);
+
+-- Insert Polish VAT rates
+insert into public.vat_rates (code, name, rate, description) values
+  ('23', '23%', 0.23, 'Stawka podstawowa VAT'),
+  ('8', '8%', 0.08, 'Stawka obniżona VAT 8%'),
+  ('5', '5%', 0.05, 'Stawka obniżona VAT 5%'),
+  ('0', '0%', 0.00, 'Stawka 0% VAT'),
+  ('zw', 'Zwolnione', 0.00, 'Zwolnione z VAT'),
+  ('np', 'Nie podlega', 0.00, 'Nie podlega VAT')
+on conflict (code) do nothing;
+
+-- UNITS TABLE - Jednostki miary zgodne z KSeF
+create table if not exists public.units (
+  id uuid primary key default gen_random_uuid(),
+  code text not null unique,
+  name text not null,
+  description text,
+  active boolean not null default true,
+  created_at timestamptz not null default now(),
+  constraint units_code_not_blank check (btrim(code) <> ''),
+  constraint units_name_not_blank check (btrim(name) <> '')
+);
+
+-- RLS for units - PUBLIC READ-ONLY
+alter table public.units enable row level security;
+create policy units_select on public.units for select using (true);
+
+-- Insert common Polish/KSeF units
+insert into public.units (code, name, description) values
+  ('szt', 'sztuka', 'Jednostka podstawowa - sztuka'),
+  ('kg', 'kilogram', 'Kilogram'),
+  ('g', 'gram', 'Gram'),
+  ('t', 'tona', 'Tona metryczna'),
+  ('l', 'litr', 'Litr'),
+  ('ml', 'mililitr', 'Mililitr'),
+  ('m', 'metr', 'Metr'),
+  ('cm', 'centymetr', 'Centymetr'),
+  ('mm', 'milimetr', 'Milimetr'),
+  ('m2', 'metr kwadratowy', 'Metr kwadratowy'),
+  ('m3', 'metr sześcienny', 'Metr sześcienny'),
+  ('godz', 'godzina', 'Godzina'),
+  ('min', 'minuta', 'Minuta'),
+  ('dzień', 'dzień', 'Dzień'),
+  ('tydzień', 'tydzień', 'Tydzień'),
+  ('miesiąc', 'miesiąc', 'Miesiąc'),
+  ('usł', 'usługa', 'Usługa'),
+  ('komplet', 'komplet', 'Komplet'),
+  ('opak', 'opakowanie', 'Opakowanie'),
+  ('para', 'para', 'Para'),
+  ('zest', 'zestaw', 'Zestaw')
+on conflict (code) do nothing;
+
+-- CURRENCIES TABLE - Waluty ISO 4217
+create table if not exists public.currencies (
+  id uuid primary key default gen_random_uuid(),
+  code text not null unique,
+  name text not null,
+  symbol text,
+  decimal_places integer not null default 2,
+  active boolean not null default true,
+  created_at timestamptz not null default now(),
+  constraint currencies_code_len check (char_length(code) = 3),
+  constraint currencies_name_not_blank check (btrim(name) <> ''),
+  constraint currencies_decimal_places_valid check (decimal_places >= 0 and decimal_places <= 4)
+);
+
+-- RLS for currencies - PUBLIC READ-ONLY
+alter table public.currencies enable row level security;
+create policy currencies_select on public.currencies for select using (true);
+
+-- Insert common currencies
+insert into public.currencies (code, name, symbol, decimal_places) values
+  ('PLN', 'Polski złoty', 'zł', 2),
+  ('EUR', 'Euro', '€', 2),
+  ('USD', 'Dolar amerykański', '$', 2),
+  ('GBP', 'Funt brytyjski', '£', 2),
+  ('CZK', 'Korona czeska', 'Kč', 2),
+  ('CHF', 'Frank szwajcarski', 'CHF', 2),
+  ('NOK', 'Korona norweska', 'kr', 2),
+  ('SEK', 'Korona szwedzka', 'kr', 2),
+  ('DKK', 'Korona duńska', 'kr', 2),
+  ('HUF', 'Forint węgierski', 'Ft', 2),
+  ('UAH', 'Hrywna ukraińska', '₴', 2),
+  ('CAD', 'Dolar kanadyjski', 'CA$', 2),
+  ('AUD', 'Dolar australijski', 'A$', 2),
+  ('JPY', 'Jen japoński', '¥', 0)
+on conflict (code) do nothing;
+
+-- COUNTRIES TABLE - Kraje ISO 3166-1
+create table if not exists public.countries (
+  id uuid primary key default gen_random_uuid(),
+  code text not null unique,
+  name text not null,
+  name_en text not null,
+  eu_member boolean not null default false,
+  active boolean not null default true,
+  created_at timestamptz not null default now(),
+  constraint countries_code_len check (char_length(code) = 2),
+  constraint countries_name_not_blank check (btrim(name) <> ''),
+  constraint countries_name_en_not_blank check (btrim(name_en) <> '')
+);
+
+-- RLS for countries - PUBLIC READ-ONLY
+alter table public.countries enable row level security;
+create policy countries_select on public.countries for select using (true);
+
+-- Insert European countries (focus on EU and neighbors)
+insert into public.countries (code, name, name_en, eu_member) values
+  ('PL', 'Polska', 'Poland', true),
+  ('DE', 'Niemcy', 'Germany', true),
+  ('FR', 'Francja', 'France', true),
+  ('IT', 'Włochy', 'Italy', true),
+  ('ES', 'Hiszpania', 'Spain', true),
+  ('CZ', 'Czechy', 'Czech Republic', true),
+  ('SK', 'Słowacja', 'Slovakia', true),
+  ('HU', 'Węgry', 'Hungary', true),
+  ('AT', 'Austria', 'Austria', true),
+  ('BE', 'Belgia', 'Belgium', true),
+  ('NL', 'Holandia', 'Netherlands', true),
+  ('DK', 'Dania', 'Denmark', true),
+  ('SE', 'Szwecja', 'Sweden', true),
+  ('FI', 'Finlandia', 'Finland', true),
+  ('NO', 'Norwegia', 'Norway', false),
+  ('CH', 'Szwajcaria', 'Switzerland', false),
+  ('GB', 'Wielka Brytania', 'United Kingdom', false),
+  ('IE', 'Irlandia', 'Ireland', true),
+  ('PT', 'Portugalia', 'Portugal', true),
+  ('GR', 'Grecja', 'Greece', true),
+  ('HR', 'Chorwacja', 'Croatia', true),
+  ('SI', 'Słowenia', 'Slovenia', true),
+  ('LT', 'Litwa', 'Lithuania', true),
+  ('LV', 'Łotwa', 'Latvia', true),
+  ('EE', 'Estonia', 'Estonia', true),
+  ('RO', 'Rumunia', 'Romania', true),
+  ('BG', 'Bułgaria', 'Bulgaria', true),
+  ('UA', 'Ukraina', 'Ukraine', false),
+  ('BY', 'Białoruś', 'Belarus', false),
+  ('RU', 'Rosja', 'Russia', false),
+  ('US', 'Stany Zjednoczone', 'United States', false),
+  ('CA', 'Kanada', 'Canada', false),
+  ('CN', 'Chiny', 'China', false),
+  ('JP', 'Japonia', 'Japan', false),
+  ('AU', 'Australia', 'Australia', false)
+on conflict (code) do nothing;
 
 -- DONE! Your InvoiceForge database is ready! 🎉
