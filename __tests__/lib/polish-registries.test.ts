@@ -5,8 +5,47 @@
 
 import { polishRegistriesService, usePolishRegistries } from '../../src/lib/polish-registries';
 
+// The GUSData interface is not exported from the source file, so we replicate it here for type safety in tests.
+interface _GUSData {
+  nip?: string;
+  regon?: string;
+  nazwa?: string;
+  ulica?: string;
+  nrNieruchomosci?: string;
+  nrLokalu?: string;
+  kodPocztowy?: string;
+  miejscowosc?: string;
+  wojewodztwo?: string;
+  statusNip?: string;
+}
+
+// Interface for accessing private members in tests
+interface TestPolishRegistriesService {
+  gusSessionId?: string;
+  getGUSSessionId(): Promise<string>;
+  performGUSSearch(nip: string): Promise<unknown>;
+  parseGUSSearchResponse(xml: string): unknown;
+  mapGUSStatus(status: string): string;
+  mapGUSDataToCompanyData(data: unknown): unknown;
+  mapCEIDGStatus(status: string): string;
+  mapKRSStatus(status: string): string;
+  findKRSByNIP(nip: string): Promise<string | null>;
+  searchCompany(nip: string): Promise<unknown>;
+}
+
+// Type assertion to access private members in tests
+const service = polishRegistriesService as unknown as TestPolishRegistriesService;
+
 // Mock external API calls
 global.fetch = jest.fn();
+
+// Helper for creating mock Response objects
+const createMockResponse = (body: string, ok = true, status?: number): Partial<Response> => ({
+  ok,
+  status: status ?? (ok ? 200 : 500),
+  text: jest.fn().mockResolvedValue(body),
+  json: jest.fn().mockResolvedValue({}),
+});
 
 // Mock logger
 jest.mock('@/lib/logger', () => ({
@@ -430,15 +469,10 @@ describe('PolishRegistriesService', () => {
           </soap:Body>
         </soap:Envelope>`;
 
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        text: jest.fn().mockResolvedValue(sessionResponse),
-      });
+      (global.fetch as jest.MockedFunction<typeof fetch>).mockResolvedValueOnce(
+        createMockResponse(sessionResponse) as Response,
+      );
 
-      // Access private method for testing
-      const service = polishRegistriesService as unknown as {
-        getGUSSessionId: () => Promise<string>;
-      };
       await service.getGUSSessionId();
 
       expect(fetch).toHaveBeenCalledWith(
@@ -454,12 +488,10 @@ describe('PolishRegistriesService', () => {
     });
 
     it('should handle GUS session login failure', async () => {
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: false,
-        status: 500,
-      });
+      (global.fetch as jest.MockedFunction<typeof fetch>).mockResolvedValueOnce(
+        createMockResponse('', false) as Response,
+      );
 
-      const service = polishRegistriesService as unknown as Record<string, unknown>;
       await expect(service.getGUSSessionId()).rejects.toThrow('GUS API login failed: 500');
     });
 
@@ -471,12 +503,10 @@ describe('PolishRegistriesService', () => {
           </soap:Body>
         </soap:Envelope>`;
 
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        text: jest.fn().mockResolvedValue(malformedResponse),
-      });
+      (global.fetch as jest.MockedFunction<typeof fetch>).mockResolvedValueOnce(
+        createMockResponse(malformedResponse) as Response,
+      );
 
-      const service = polishRegistriesService as unknown as Record<string, unknown>;
       await expect(service.getGUSSessionId()).rejects.toThrow('Failed to extract session ID from GUS response');
     });
 
@@ -494,12 +524,10 @@ describe('PolishRegistriesService', () => {
           </soap:Body>
         </soap:Envelope>`;
 
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        text: jest.fn().mockResolvedValue(searchResponse),
-      });
+      (global.fetch as jest.MockedFunction<typeof fetch>).mockResolvedValueOnce(
+        createMockResponse(searchResponse) as Response,
+      );
 
-      const service = polishRegistriesService as unknown as Record<string, unknown>;
       service.gusSessionId = 'test-session';
 
       const result = await service.performGUSSearch('5260000734');
@@ -515,12 +543,10 @@ describe('PolishRegistriesService', () => {
     });
 
     it('should handle GUS search API error', async () => {
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: false,
-        status: 400,
-      });
+      (global.fetch as jest.MockedFunction<typeof fetch>).mockResolvedValueOnce(
+        createMockResponse('', false, 400) as Response,
+      );
 
-      const service = polishRegistriesService as unknown as Record<string, unknown>;
       service.gusSessionId = 'test-session';
 
       await expect(service.performGUSSearch('5260000734')).rejects.toThrow('GUS search failed: 400');
@@ -539,7 +565,6 @@ describe('PolishRegistriesService', () => {
           </soap:Body>
         </soap:Envelope>`;
 
-      const service = polishRegistriesService as unknown as Record<string, unknown>;
       const result = service.parseGUSSearchResponse(xmlResponse);
 
       expect(result).toEqual({ regon: '987654321' });
@@ -553,7 +578,6 @@ describe('PolishRegistriesService', () => {
           </soap:Body>
         </soap:Envelope>`;
 
-      const service = polishRegistriesService as unknown as Record<string, unknown>;
       const result = service.parseGUSSearchResponse(emptyResponse);
 
       expect(result).toBeNull();
@@ -562,15 +586,12 @@ describe('PolishRegistriesService', () => {
     it('should return null for malformed GUS XML response', async () => {
       const malformedResponse = `<invalid>xml</response>`;
 
-      const service = polishRegistriesService as unknown as Record<string, unknown>;
       const result = service.parseGUSSearchResponse(malformedResponse);
 
       expect(result).toBeNull();
     });
 
     it('should test GUS status mapping', async () => {
-      const service = polishRegistriesService as unknown as Record<string, unknown>;
-
       // Test different status mappings
       expect(service.mapGUSStatus('1')).toBe('active');
       expect(service.mapGUSStatus('2')).toBe('inactive');
@@ -579,8 +600,6 @@ describe('PolishRegistriesService', () => {
     });
 
     it('should test GUS company data mapping', async () => {
-      const service = polishRegistriesService as unknown as Record<string, unknown>;
-
       const gusData = {
         nip: '5260000734',
         regon: '123456789',
@@ -614,8 +633,6 @@ describe('PolishRegistriesService', () => {
     });
 
     it('should test GUS company data with minimal fields', async () => {
-      const service = polishRegistriesService as unknown as Record<string, unknown>;
-
       const minimalData = {
         nip: '',
         regon: '',
@@ -678,8 +695,6 @@ describe('PolishRegistriesService', () => {
 });
 
 describe('Status mappings', () => {
-  const service = polishRegistriesService as unknown as Record<string, unknown>;
-
   it('should map CEIDG status correctly', () => {
     expect(service.mapCEIDGStatus('aktywna')).toBe('active');
     expect(service.mapCEIDGStatus('active')).toBe('active');
@@ -763,8 +778,7 @@ describe('KRS edge cases', () => {
 
   it('should handle KRS findKRSByNIP failure', async () => {
     // Mock findKRSByNIP to return null
-    const service = polishRegistriesService as unknown as Record<string, unknown>;
-    service.findKRSByNIP = jest.fn().mockResolvedValue(null);
+    jest.spyOn(service, 'findKRSByNIP').mockResolvedValue(null);
 
     const result = await polishRegistriesService.searchInKRS('5260000734');
     expect(result).toBeNull();
@@ -772,21 +786,18 @@ describe('KRS edge cases', () => {
 
   it('should handle KRS API error', async () => {
     // Mock findKRSByNIP to return KRS number
-    const service = polishRegistriesService as unknown as Record<string, unknown>;
-    service.findKRSByNIP = jest.fn().mockResolvedValue('0000123456');
+    jest.spyOn(service, 'findKRSByNIP').mockResolvedValue('0000123456');
 
-    (global.fetch as jest.Mock).mockResolvedValue({
-      ok: false,
-      status: 500,
-    });
+    (global.fetch as jest.MockedFunction<typeof fetch>).mockResolvedValue(
+      createMockResponse('', false, 500) as Response,
+    );
 
     const result = await polishRegistriesService.searchInKRS('5260000734');
     expect(result).toBeNull();
   });
 
   it('should handle KRS search network error', async () => {
-    const service = polishRegistriesService as unknown as Record<string, unknown>;
-    service.findKRSByNIP = jest.fn().mockRejectedValue(new Error('Network error'));
+    jest.spyOn(service, 'findKRSByNIP').mockRejectedValue(new Error('Network error'));
 
     const result = await polishRegistriesService.searchInKRS('5260000734');
     expect(result).toBeNull();

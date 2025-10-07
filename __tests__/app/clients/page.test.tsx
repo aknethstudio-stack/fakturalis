@@ -14,13 +14,53 @@ jest.mock('next/navigation', () => ({
   }),
 }));
 
-// Create stable mock objects
+// --- START: Correctly Typed Supabase Mocks ---
+
+// This helper creates a mock of the Supabase query builder chain.
+// It allows us to mock methods like .select(), .eq(), .order(), etc.
+const createMockQueryBuilder = (data: unknown, error: unknown) => {
+  const queryBuilder: Record<string, jest.Mock> = {
+    select: jest.fn(),
+    eq: jest.fn(),
+    order: jest.fn(),
+    or: jest.fn(),
+    delete: jest.fn(),
+  };
+
+  const target = () => Promise.resolve({ data, error });
+
+  const mockChain = new Proxy(target, {
+    get: (target, prop) => {
+      if (prop === 'then') {
+        return target().then.bind(target());
+      }
+      if (!queryBuilder[prop as string]) {
+        queryBuilder[prop as string] = jest.fn().mockReturnValue(mockChain);
+      }
+      return queryBuilder[prop as string];
+    },
+  }) as unknown as Record<string, jest.Mock>;
+
+  // Pre-setup common query methods to return the chain
+  queryBuilder.select?.mockReturnValue(mockChain);
+  queryBuilder.eq?.mockReturnValue(mockChain);
+  queryBuilder.order?.mockReturnValue(mockChain);
+  queryBuilder.or?.mockReturnValue(mockChain);
+  queryBuilder.delete?.mockReturnValue(mockChain);
+
+  return mockChain;
+};
+
+const mockFrom = jest.fn();
+
 const mockSupabaseInstance = {
-  from: jest.fn(),
+  from: mockFrom,
   auth: {
-    getUser: jest.fn(),
+    getUser: jest.fn().mockResolvedValue({ data: { user: { id: 'test-user-id' } } }),
   },
 };
+
+// --- END: Correctly Typed Supabase Mocks ---
 
 const mockUserInstance = { id: 'test-user-id' };
 const mockSignOutInstance = jest.fn();
@@ -52,11 +92,13 @@ jest.mock('@/lib/logger', () => ({
 
 import ClientsPage from '@/app/clients/page';
 import { logger } from '@/lib/logger';
+import type { Client } from '@/types/database';
 
-const mockSupabase = mockSupabaseInstance as jest.Mocked<typeof mockSupabaseInstance>;
+const _mockSupabase = mockSupabaseInstance as jest.Mocked<typeof mockSupabaseInstance>;
 const mockLogger = logger as jest.Mocked<typeof logger>;
 
-const mockClients = [
+// Correctly typed mock data
+const mockClients: Client[] = [
   {
     id: 'client-1',
     name: 'Test Company 1',
@@ -67,7 +109,6 @@ const mockClients = [
     address_line2: null,
     city: 'Warsaw',
     postal_code: '00-001',
-    state_province: 'Mazowieckie',
     country_code: 'PL',
     notes: null,
     owner_id: 'test-user-id',
@@ -80,157 +121,126 @@ describe('ClientsPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    // Mock successful response by default
-    const mockQuery = {
+    // Create a simple mock that just returns a promise with the right structure
+    const simpleMockChain = {
+      select: jest.fn().mockReturnThis(),
       eq: jest.fn().mockReturnThis(),
       order: jest.fn().mockReturnThis(),
-      or: jest.fn().mockResolvedValue({
-        data: mockClients,
-        error: null,
-      }),
+      or: jest.fn().mockReturnThis(),
+      delete: jest.fn().mockReturnThis(),
     };
 
-    mockSupabase.from.mockReturnValue({
-      select: jest.fn().mockReturnValue(mockQuery),
-      delete: jest.fn().mockReturnValue({
-        eq: jest.fn().mockReturnValue({
-          eq: jest.fn().mockResolvedValue({
-            error: null,
-          }),
-        }),
-      }),
-    } as unknown);
-  });
-
-  it('renders page header', async () => {
-    await act(async () => {
-      render(<ClientsPage />);
+    // Make the chain awaitable - when awaited, it returns { data, error }
+    Object.assign(simpleMockChain, {
+      then: (resolve: (value: { data: unknown; error: null }) => unknown) => {
+        return Promise.resolve({ data: mockClients, error: null }).then(resolve);
+      },
     });
 
+    // Default mock will be set up by individual tests as needed
+    // mockFrom.mockReturnValue(simpleMockChain);
+  });
+
+  it('SIMPLE TEST - does basic data loading work', async () => {
+    mockFrom.mockReturnValueOnce(createMockQueryBuilder(mockClients, null));
+    render(<ClientsPage />);
+    await waitFor(() => {
+      expect(screen.getByText('Test Company 1')).toBeInTheDocument();
+      expect(screen.getByText('test1@example.com')).toBeInTheDocument();
+    });
+  });
+
+  it('renders page header', () => {
+    // Mock to prevent errors during render
+    mockFrom.mockReturnValueOnce(createMockQueryBuilder(mockClients, null));
+
+    render(<ClientsPage />);
     expect(screen.getByText('Klienci')).toBeInTheDocument();
     expect(screen.getByText('Zarządzanie bazą klientów i ich danymi kontaktowymi')).toBeInTheDocument();
   });
 
   it('shows loading state initially', async () => {
-    // Mock a slow/pending response
-    const mockQuery = {
+    // Create a mock that will delay before resolving
+    const slowMockChain = {
+      select: jest.fn().mockReturnThis(),
       eq: jest.fn().mockReturnThis(),
       order: jest.fn().mockReturnThis(),
-      or: jest.fn().mockReturnValue(new Promise(() => {})), // Never resolves
-    };
-
-    mockSupabase.from.mockReturnValue({
-      select: jest.fn().mockReturnValue(mockQuery),
-    } as unknown);
-
-    render(<ClientsPage />);
-
-    expect(screen.getByText('Ładowanie klientów...')).toBeInTheDocument();
-  });
-
-  it('shows add client button', async () => {
-    await act(async () => {
-      render(<ClientsPage />);
-    });
-
-    expect(screen.getByText('Dodaj klienta')).toBeInTheDocument();
-  });
-
-  it('shows search input', async () => {
-    await act(async () => {
-      render(<ClientsPage />);
-    });
-
-    expect(screen.getByPlaceholderText(/szukaj klientów/i)).toBeInTheDocument();
-  });
-
-  it('shows empty state when no clients', async () => {
-    // Mock empty response
-    const mockQuery = {
-      eq: jest.fn().mockReturnThis(),
-      order: jest.fn().mockReturnThis(),
-      or: jest.fn().mockResolvedValue({
-        data: [],
-        error: null,
+      or: jest.fn().mockReturnThis(),
+      delete: jest.fn().mockReturnThis(),
+      then: jest.fn((resolve: (value: { data: unknown; error: null }) => unknown) => {
+        // Delay the resolution to simulate loading
+        return new Promise((res) => {
+          setTimeout(() => {
+            resolve({ data: mockClients, error: null });
+            res({ data: mockClients, error: null });
+          }, 100);
+        });
       }),
     };
 
-    mockSupabase.from.mockReturnValue({
-      select: jest.fn().mockReturnValue(mockQuery),
-    } as unknown);
-
-    await act(async () => {
-      render(<ClientsPage />);
-    });
-
-    // Wait for async operations to complete
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 0));
-    });
-
-    expect(screen.getByText('Brak klientów')).toBeInTheDocument();
-  });
-
-  it('handles API errors gracefully', async () => {
-    // Mock error response - simulate the actual query chain: .eq().order()
-    const mockErrorQuery = Promise.resolve({
-      data: null,
-      error: { message: 'Database error' },
-    });
-
-    const mockQuery = {
-      eq: jest.fn().mockReturnThis(),
-      order: jest.fn().mockReturnValue(mockErrorQuery),
-      or: jest.fn().mockReturnValue(mockErrorQuery),
-    };
-
-    mockSupabase.from.mockReturnValue({
-      select: jest.fn().mockReturnValue(mockQuery),
-    } as unknown);
+    mockFrom.mockReturnValueOnce(slowMockChain);
 
     render(<ClientsPage />);
 
-    // Wait for the error to be processed
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 100));
+    // Initially should show loading state
+    expect(screen.getByText('Ładowanie klientów...')).toBeInTheDocument();
+
+    // Wait for loading to complete
+    await waitFor(() => {
+      expect(screen.getByText('Test Company 1')).toBeInTheDocument();
+    });
+  });
+
+  it('shows add client button', async () => {
+    // Mock to prevent errors during render
+    mockFrom.mockReturnValueOnce(createMockQueryBuilder(mockClients, null));
+
+    render(<ClientsPage />);
+
+    const addButton = screen.getByText('Dodaj klienta');
+    expect(addButton).toBeInTheDocument();
+    expect(addButton.closest('a')).toHaveAttribute('href', '/clients/new');
+  });
+
+  it('shows search input', () => {
+    // Mock to prevent errors during render
+    mockFrom.mockReturnValueOnce(createMockQueryBuilder(mockClients, null));
+
+    render(<ClientsPage />);
+
+    const searchInput = screen.getByPlaceholderText('Szukaj klientów po nazwie, emailu lub NIP...');
+    expect(searchInput).toBeInTheDocument();
+    expect(searchInput).toHaveAttribute('type', 'text');
+  });
+
+  it('shows empty state when no clients', async () => {
+    // Mock empty response for this test only
+    mockFrom.mockReturnValueOnce(createMockQueryBuilder([], null));
+    render(<ClientsPage />);
+    await waitFor(() => expect(screen.getByText('Brak klientów')).toBeInTheDocument());
+  });
+
+  it('handles API errors gracefully', async () => {
+    // Mock error response for this test only
+    const dbError = { message: 'Database error', code: '500', details: '', hint: '' };
+    mockFrom.mockReturnValueOnce(createMockQueryBuilder(null, dbError));
+
+    render(<ClientsPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Nie udało się pobrać listy klientów')).toBeInTheDocument();
     });
 
-    expect(screen.getByText('Nie udało się pobrać listy klientów')).toBeInTheDocument();
     expect(mockLogger.error).toHaveBeenCalledWith(
       'Failed to fetch clients',
-      { message: 'Database error' },
+      expect.objectContaining({ message: 'Database error' }),
       { component: 'ClientsPage' },
     );
   });
 
   it('displays client list when data is available', async () => {
-    const mockQuery = {
-      eq: jest.fn().mockReturnThis(),
-      order: jest.fn().mockResolvedValue({
-        data: mockClients,
-        error: null,
-      }),
-      or: jest.fn().mockResolvedValue({
-        data: mockClients,
-        error: null,
-      }),
-    };
-
-    mockSupabase.from.mockReturnValue({
-      select: jest.fn().mockReturnValue(mockQuery),
-      delete: jest.fn().mockReturnValue({
-        eq: jest.fn().mockReturnValue({
-          eq: jest.fn().mockResolvedValue({
-            error: null,
-          }),
-        }),
-      }),
-    } as unknown);
-
-    await act(async () => {
-      render(<ClientsPage />);
-    });
-
+    mockFrom.mockReturnValueOnce(createMockQueryBuilder(mockClients, null));
+    render(<ClientsPage />);
     await waitFor(() => {
       expect(screen.getByText('Test Company 1')).toBeInTheDocument();
       expect(screen.getByText('test1@example.com')).toBeInTheDocument();
@@ -241,35 +251,23 @@ describe('ClientsPage', () => {
 
   it('handles search functionality', async () => {
     const user = userEvent.setup();
-    const mockOrQuery = jest.fn().mockResolvedValue({
-      data: mockClients,
-      error: null,
-    });
+    const mockQueryChain = createMockQueryBuilder(mockClients, null);
+    mockFrom.mockReturnValue(mockQueryChain);
 
-    const mockQuery = {
-      eq: jest.fn().mockReturnThis(),
-      order: jest.fn().mockReturnThis(),
-      or: mockOrQuery,
-    };
-
-    mockSupabase.from.mockReturnValue({
-      select: jest.fn().mockReturnValue(mockQuery),
-    } as unknown);
-
-    await act(async () => {
-      render(<ClientsPage />);
-    });
+    render(<ClientsPage />);
+    await waitFor(() => expect(screen.getByPlaceholderText(/szukaj klientów/i)).toBeInTheDocument());
 
     const searchInput = screen.getByPlaceholderText(/szukaj klientów/i);
-
     await act(async () => {
       await user.clear(searchInput);
       await user.type(searchInput, 'Test Company');
     });
 
-    // Wait for re-render after state change
+    // Debounce in component is ~300ms, let's wait for it
+    await new Promise((r) => setTimeout(r, 350));
+
     await waitFor(() => {
-      expect(mockOrQuery).toHaveBeenCalledWith(
+      expect(mockQueryChain.or).toHaveBeenCalledWith(
         'name.ilike.%Test Company%,email.ilike.%Test Company%,vat_id.ilike.%Test Company%',
       );
     });
@@ -277,31 +275,23 @@ describe('ClientsPage', () => {
 
   it('shows different empty state message when search has no results', async () => {
     const user = userEvent.setup();
-    const mockQuery = {
-      eq: jest.fn().mockReturnThis(),
-      order: jest.fn().mockResolvedValue({
-        data: [],
-        error: null,
-      }),
-      or: jest.fn().mockResolvedValue({
-        data: [],
-        error: null,
-      }),
-    };
+    // Initial load is successful with clients
+    mockFrom.mockReturnValueOnce(createMockQueryBuilder(mockClients, null));
 
-    mockSupabase.from.mockReturnValue({
-      select: jest.fn().mockReturnValue(mockQuery),
-    } as unknown);
+    render(<ClientsPage />);
+    await waitFor(() => expect(screen.getByText('Test Company 1')).toBeInTheDocument());
 
-    await act(async () => {
-      render(<ClientsPage />);
-    });
+    // Mock for the search returning no results
+    const mockEmptyQueryChain = createMockQueryBuilder([], null);
+    mockFrom.mockReturnValue(mockEmptyQueryChain);
 
     const searchInput = screen.getByPlaceholderText(/szukaj klientów/i);
-
     await act(async () => {
       await user.type(searchInput, 'nonexistent');
     });
+
+    // Debounce
+    await new Promise((r) => setTimeout(r, 350));
 
     await waitFor(() => {
       expect(screen.getByText('Nie znaleziono klientów spełniających kryteria wyszukiwania.')).toBeInTheDocument();
@@ -310,39 +300,17 @@ describe('ClientsPage', () => {
 
   it('shows delete confirmation when trash button is clicked', async () => {
     const user = userEvent.setup();
-    const mockQuery = {
-      eq: jest.fn().mockReturnThis(),
-      order: jest.fn().mockResolvedValue({
-        data: mockClients,
-        error: null,
-      }),
-      or: jest.fn().mockResolvedValue({
-        data: mockClients,
-        error: null,
-      }),
-    };
 
-    mockSupabase.from.mockReturnValue({
-      select: jest.fn().mockReturnValue(mockQuery),
-      delete: jest.fn().mockReturnValue({
-        eq: jest.fn().mockReturnValue({
-          eq: jest.fn().mockResolvedValue({
-            error: null,
-          }),
-        }),
-      }),
-    } as unknown);
+    // Mock to display clients
+    mockFrom.mockReturnValueOnce(createMockQueryBuilder(mockClients, null));
 
-    await act(async () => {
-      render(<ClientsPage />);
-    });
+    render(<ClientsPage />);
 
     await waitFor(() => {
       expect(screen.getByText('Test Company 1')).toBeInTheDocument();
     });
 
     const deleteButton = screen.getByTitle('Usuń klienta');
-
     await act(async () => {
       await user.click(deleteButton);
     });
@@ -353,45 +321,22 @@ describe('ClientsPage', () => {
 
   it('cancels delete when cancel button is clicked', async () => {
     const user = userEvent.setup();
-    const mockQuery = {
-      eq: jest.fn().mockReturnThis(),
-      order: jest.fn().mockResolvedValue({
-        data: mockClients,
-        error: null,
-      }),
-      or: jest.fn().mockResolvedValue({
-        data: mockClients,
-        error: null,
-      }),
-    };
 
-    mockSupabase.from.mockReturnValue({
-      select: jest.fn().mockReturnValue(mockQuery),
-      delete: jest.fn().mockReturnValue({
-        eq: jest.fn().mockReturnValue({
-          eq: jest.fn().mockResolvedValue({
-            error: null,
-          }),
-        }),
-      }),
-    } as unknown);
+    // Mock to display clients
+    mockFrom.mockReturnValueOnce(createMockQueryBuilder(mockClients, null));
 
-    await act(async () => {
-      render(<ClientsPage />);
-    });
+    render(<ClientsPage />);
 
     await waitFor(() => {
       expect(screen.getByText('Test Company 1')).toBeInTheDocument();
     });
 
     const deleteButton = screen.getByTitle('Usuń klienta');
-
     await act(async () => {
       await user.click(deleteButton);
     });
 
     const cancelButton = screen.getByText('Anuluj');
-
     await act(async () => {
       await user.click(cancelButton);
     });
@@ -402,140 +347,83 @@ describe('ClientsPage', () => {
 
   it('handles successful delete', async () => {
     const user = userEvent.setup();
-    const mockDeleteQuery = {
-      eq: jest.fn().mockReturnValue({
-        eq: jest.fn().mockResolvedValue({
-          error: null,
-        }),
-      }),
-    };
 
-    const mockQuery = {
-      eq: jest.fn().mockReturnThis(),
-      order: jest.fn().mockResolvedValue({
-        data: mockClients,
-        error: null,
-      }),
-      or: jest.fn().mockResolvedValue({
-        data: mockClients,
-        error: null,
-      }),
-    };
+    // Mock initial data load
+    mockFrom.mockReturnValueOnce(createMockQueryBuilder(mockClients, null));
 
-    mockSupabase.from.mockReturnValue({
-      select: jest.fn().mockReturnValue(mockQuery),
-      delete: jest.fn().mockReturnValue(mockDeleteQuery),
-    } as unknown);
-
-    await act(async () => {
-      render(<ClientsPage />);
-    });
+    render(<ClientsPage />);
 
     await waitFor(() => {
       expect(screen.getByText('Test Company 1')).toBeInTheDocument();
     });
 
-    const deleteButton = screen.getByTitle('Usuń klienta');
+    // Mock delete operation
+    const mockDeleteChain = createMockQueryBuilder(null, null);
+    mockFrom.mockReturnValueOnce(mockDeleteChain);
 
+    // Mock refresh after delete - empty list
+    mockFrom.mockReturnValueOnce(createMockQueryBuilder([], null));
+
+    const deleteButton = screen.getByTitle('Usuń klienta');
     await act(async () => {
       await user.click(deleteButton);
     });
 
     const confirmButton = screen.getByText('Potwierdź');
-
     await act(async () => {
       await user.click(confirmButton);
     });
 
-    expect(mockLogger.info).toHaveBeenCalledWith('Client deleted successfully', { clientId: 'client-1' });
+    // Check that delete was called with correct parameters
+    await waitFor(() => {
+      expect(mockDeleteChain.delete).toHaveBeenCalled();
+      expect(mockDeleteChain.eq).toHaveBeenCalledWith('id', 'client-1');
+      expect(mockDeleteChain.eq).toHaveBeenCalledWith('owner_id', 'test-user-id');
+    });
   });
 
   it('handles delete error', async () => {
     const user = userEvent.setup();
-    const mockDeleteQuery = {
-      eq: jest.fn().mockReturnValue({
-        eq: jest.fn().mockResolvedValue({
-          error: { message: 'Delete error' },
-        }),
-      }),
-    };
 
-    const mockQuery = {
-      eq: jest.fn().mockReturnThis(),
-      order: jest.fn().mockResolvedValue({
-        data: mockClients,
-        error: null,
-      }),
-      or: jest.fn().mockResolvedValue({
-        data: mockClients,
-        error: null,
-      }),
-    };
+    // Mock initial data load
+    mockFrom.mockReturnValueOnce(createMockQueryBuilder(mockClients, null));
 
-    mockSupabase.from.mockReturnValue({
-      select: jest.fn().mockReturnValue(mockQuery),
-      delete: jest.fn().mockReturnValue(mockDeleteQuery),
-    } as unknown);
-
-    await act(async () => {
-      render(<ClientsPage />);
-    });
+    render(<ClientsPage />);
 
     await waitFor(() => {
       expect(screen.getByText('Test Company 1')).toBeInTheDocument();
     });
 
-    const deleteButton = screen.getByTitle('Usuń klienta');
+    // Mock delete operation with error
+    const deleteError = { message: 'Delete failed', code: '500', details: '', hint: '' };
+    const mockDeleteChain = createMockQueryBuilder(null, deleteError);
+    mockFrom.mockReturnValueOnce(mockDeleteChain);
 
+    const deleteButton = screen.getByTitle('Usuń klienta');
     await act(async () => {
       await user.click(deleteButton);
     });
 
     const confirmButton = screen.getByText('Potwierdź');
-
     await act(async () => {
       await user.click(confirmButton);
     });
 
+    // Should show error message
     await waitFor(() => {
       expect(screen.getByText('Nie udało się usunąć klienta')).toBeInTheDocument();
     });
 
     expect(mockLogger.error).toHaveBeenCalledWith(
       'Failed to delete client',
-      { message: 'Delete error' },
-      { clientId: 'client-1', component: 'ClientsPage' },
+      expect.objectContaining({ message: 'Delete failed' }),
+      expect.objectContaining({ clientId: 'client-1', component: 'ClientsPage' }),
     );
   });
 
   it('displays edit button for each client', async () => {
-    const mockQuery = {
-      eq: jest.fn().mockReturnThis(),
-      order: jest.fn().mockResolvedValue({
-        data: mockClients,
-        error: null,
-      }),
-      or: jest.fn().mockResolvedValue({
-        data: mockClients,
-        error: null,
-      }),
-    };
-
-    mockSupabase.from.mockReturnValue({
-      select: jest.fn().mockReturnValue(mockQuery),
-      delete: jest.fn().mockReturnValue({
-        eq: jest.fn().mockReturnValue({
-          eq: jest.fn().mockResolvedValue({
-            error: null,
-          }),
-        }),
-      }),
-    } as unknown);
-
-    await act(async () => {
-      render(<ClientsPage />);
-    });
-
+    mockFrom.mockReturnValueOnce(createMockQueryBuilder(mockClients, null));
+    render(<ClientsPage />);
     await waitFor(() => {
       expect(screen.getByTitle('Edytuj klienta')).toBeInTheDocument();
     });
