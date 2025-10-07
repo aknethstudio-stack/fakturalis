@@ -17,6 +17,11 @@
     "enabled": true
   },
   "git": {
+    "deploymentEnabled": {
+      "main": false,
+      "master": true,
+      "develop": true
+    },
     "silent": false
   },
   "regions": ["fra1"],
