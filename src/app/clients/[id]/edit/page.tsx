@@ -59,8 +59,13 @@ export default function EditClientPage() {
     fetchClient();
   }, [user, clientId, supabase]);
 
+  useEffect(() => {
+    if (!user && typeof window !== 'undefined') {
+      router.push('/auth/login');
+    }
+  }, [user, router]);
+
   if (!user) {
-    router.push('/auth/login');
     return null;
   }
 

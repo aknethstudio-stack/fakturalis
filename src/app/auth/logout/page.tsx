@@ -14,10 +14,14 @@ export default function LogoutPage() {
     const handleLogout = async () => {
       try {
         await signOut();
-        router.push('/auth/login?message=Zostałeś wylogowany');
+        if (typeof window !== 'undefined') {
+          router.push('/auth/login?message=Zostałeś wylogowany');
+        }
       } catch (error) {
         logger.error('Logout error', error, { component: 'LogoutPage' });
-        router.push('/auth/login?error=logout_error');
+        if (typeof window !== 'undefined') {
+          router.push('/auth/login?error=logout_error');
+        }
       }
     };
 

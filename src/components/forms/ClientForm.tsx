@@ -258,7 +258,7 @@ export default function ClientForm({ client, onSuccess, onCancel }: ClientFormPr
 
       if (onSuccess) {
         onSuccess();
-      } else {
+      } else if (typeof window !== 'undefined') {
         router.push('/clients');
       }
     } catch (error) {
@@ -536,7 +536,7 @@ export default function ClientForm({ client, onSuccess, onCancel }: ClientFormPr
           <div className='flex justify-end space-x-3 border-t border-gray-200 pt-6'>
             <button
               type='button'
-              onClick={onCancel || (() => router.push('/clients'))}
+              onClick={onCancel || (() => typeof window !== 'undefined' && router.push('/clients'))}
               className='rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none'>
               Anuluj
             </button>

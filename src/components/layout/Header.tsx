@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { BsBox, BsCurrencyDollar, BsFileEarmarkText, BsPeople } from 'react-icons/bs';
+import { BsBox, BsCurrencyDollar, BsFileEarmarkText, BsGrid3X3Gap, BsPeople } from 'react-icons/bs';
 import AccountDropdown from './AccountDropdown';
 import MobileMenu from './MobileMenu';
 
@@ -19,6 +19,10 @@ export default function Header() {
 
           {/* Desktop Navigation */}
           <nav className='header__nav'>
+            <Link href='/dashboard' className='header__nav-link'>
+              <BsGrid3X3Gap size={16} />
+              <span>Dashboard</span>
+            </Link>
             <Link href='/invoices' className='header__nav-link'>
               <BsFileEarmarkText size={16} />
               <span>Faktury</span>
@@ -46,6 +50,10 @@ export default function Header() {
           <div className='header__mobile-container'>
             <MobileMenu>
               <nav className='header__mobile-nav'>
+                <Link href='/dashboard' className='header__nav-link'>
+                  <BsGrid3X3Gap size={16} />
+                  <span>Dashboard</span>
+                </Link>
                 <Link href='/invoices' className='header__nav-link'>
                   <BsFileEarmarkText size={16} />
                   <span>Faktury</span>
