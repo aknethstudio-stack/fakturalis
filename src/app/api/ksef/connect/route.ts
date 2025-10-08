@@ -5,11 +5,17 @@
 
 import { ksefClient } from '@/lib/ksef/client';
 import { logger } from '@/lib/logger';
+import { createRateLimitMiddleware } from '@/lib/rate-limit';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
+const rateLimitMiddleware = createRateLimitMiddleware('critical');
+
 export async function POST(request: NextRequest) {
+  const rateLimitResponse = await rateLimitMiddleware(request);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const supabase = createRouteHandlerClient({ cookies });
 
@@ -102,7 +108,10 @@ async function encryptPassword(password: string): Promise<string> {
   return Buffer.from(password).toString('base64');
 }
 
-export async function GET(_request: NextRequest) {
+export async function GET(request: NextRequest) {
+  const rateLimitResponse = await rateLimitMiddleware(request);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const supabase = createRouteHandlerClient({ cookies });
 

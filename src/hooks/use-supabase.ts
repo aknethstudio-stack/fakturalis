@@ -86,7 +86,7 @@ export function useAuth() {
 
   const resetPassword = async (email: string, options?: { captchaToken?: string }) => {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/reset-password`,
+      redirectTo: `${typeof window !== 'undefined' ? window.location.origin : process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/reset-password`,
       ...(options?.captchaToken && {
         captchaToken: options.captchaToken,
       }),

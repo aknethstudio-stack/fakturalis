@@ -1,8 +1,11 @@
 import { logger } from '@/lib/logger';
+import { createRateLimitMiddleware } from '@/lib/rate-limit';
 import type { Database } from '@/types/database';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
+
+const rateLimitMiddleware = createRateLimitMiddleware('auth');
 
 /**
  * Handles Supabase auth callback
@@ -12,6 +15,9 @@ import { NextRequest, NextResponse } from 'next/server';
  * - OAuth login
  */
 export async function GET(request: NextRequest) {
+  const rateLimitResponse = await rateLimitMiddleware(request);
+  if (rateLimitResponse) return rateLimitResponse;
+
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get('code');
 

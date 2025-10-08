@@ -6,11 +6,17 @@
 import { ksefClient } from '@/lib/ksef/client';
 import type { KSeFInvoiceXML } from '@/lib/ksef/types';
 import { logger } from '@/lib/logger';
+import { createRateLimitMiddleware } from '@/lib/rate-limit';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
+const rateLimitMiddleware = createRateLimitMiddleware('critical');
+
 export async function POST(request: NextRequest) {
+  const rateLimitResult = await rateLimitMiddleware(request);
+  if (rateLimitResult) return rateLimitResult;
+
   try {
     const supabase = createRouteHandlerClient({ cookies });
 
