@@ -100,129 +100,51 @@ SENTRY_DSN=your_sentry_dsn
 
 Bezpieczeństwo bazowe: **$0/miesiąc** - wbudowane w kod
 
-## 📋 Implementacja
+## Kolejne kroki (rekomendowane)
 
-### Rate Limiting
-
-```typescript
-import { createRateLimitMiddleware } from '@/lib/rate-limit';
-
-// W API route
-const rateLimitMiddleware = createRateLimitMiddleware('auth');
-const rateLimitResponse = await rateLimitMiddleware(request);
-if (rateLimitResponse) return rateLimitResponse;
-```
-
-### Input Sanitization
-
-```typescript
-import { sanitizeClientData, sanitizeInvoiceData } from '@/lib/sanitize';
-
-// Czyść dane przed zapisem do bazy
-const cleanData = sanitizeClientData(formData);
-```
-
-### Audit Logging
-
-```typescript
-import { auditLogger } from '@/lib/audit';
-
-// Loguj krytyczne operacje
-await auditLogger.logInvoice('create', invoiceId, userId, request);
-```
-
-### Environment Validation
-
-```typescript
-import { getEnvironment } from '@/lib/env';
-
-// Sprawdź zmienne środowiskowe na starcie
-const env = getEnvironment();
-```
-
-## 🚧 **Kolejne kroki (rekomendowane):**
-
-### 11. **Database Encryption at Rest**
+### Database Encryption at Rest
 
 - Supabase automatycznie szyfruje dane w spoczynku
 - ✅ Już aktywne
 
-### 12. **API Key Management**
+### API Key Management
 
 - Rotacja kluczy API co 90 dni
 - Monitoring użycia kluczy
 - Separate keys per environment
 
-### 13. **Security Monitoring**
+### Security Monitoring
 
 ```bash
 npm install @sentry/integrations
 ```
 
-### 14. **Backup & Recovery**
+### Backup & Recovery
 
 - Automatyczne backupy bazy danych
 - Recovery procedures
 - Data retention policies
 
-### 15. **Penetration Testing**
+### Penetration Testing
 
 - Regularne testy penetracyjne
 - OWASP Top 10 compliance
 - Security audits
 
-### 16. **Compliance (RODO/GDPR)**
+### Compliance (RODO/GDPR)
 
 - Data Processing Agreements
 - Privacy Policy updates
 - User consent management
 - Right to be forgotten
 
-## 🔧 **Konfiguracja w środowiskach:**
-
-### Development
-
-```bash
-# .env.local
-NEXT_PUBLIC_SUPABASE_URL=your_dev_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_dev_key
-NEXT_PUBLIC_HCAPTCHA_SITE_KEY=your_dev_hcaptcha
-HCAPTCHA_SECRET_KEY=your_dev_secret
-```
-
-### Production
-
-```bash
-# Vercel Environment Variables
-NEXT_PUBLIC_SUPABASE_URL=your_prod_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_prod_key
-UPSTASH_REDIS_REST_URL=your_redis_url    # Rate limiting
-UPSTASH_REDIS_REST_TOKEN=your_redis_token
-SENTRY_DSN=your_sentry_dsn               # Error monitoring
-```
-
-## 🚨 **Security Checklist:**
-
-- [ ] SSL/TLS certificates aktywne
-- [ ] CSP headers skonfigurowane
-- [ ] Rate limiting na wszystkich API endpoints
-- [ ] Input sanitization w formularzach
-- [ ] Audit logging dla krytycznych operacji
-- [ ] Environment variables walidowane
-- [ ] Secure cookies i session timeout
-- [ ] Supabase RLS policies aktywne
-- [ ] Regular security updates
-- [ ] Monitoring i alerting
-- [ ] Backup procedures
-- [ ] Incident response plan
-
-## 🎯 **Priorytet implementacji:**
+## Priorytet implementacji
 
 1. **Wysoki** - Rate limiting, Input sanitization ✅
 2. **Średni** - Audit logging, Environment validation ✅
 3. **Niski** - Advanced monitoring, Compliance tools
 
-## 💡 **Wskazówki:**
+## Wskazówki
 
 - Regularnie aktualizuj dependencies
 - Monitoruj CVE dla używanych bibliotek

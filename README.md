@@ -1,8 +1,9 @@
 # 🧾 InvoiceForge
 
 > **Nowoczesny system fakturowania SaaS dla polskich przedsiębiorców**  
-> Twórz faktury zgodne z KSeF, zarządzaj klientami i produktami w jednym miejscu.## 🇵🇱 Polska
-> Specyfikacja & Compliance
+> Twórz faktury zgodne z KSeF, zarządzaj klientami i produktami w jednym miejscu.
+
+## 🇵🇱 Polska Specyfikacja & Compliance
 
 ### Legal Compliance
 
@@ -29,8 +30,11 @@
 - 📊 **Księgowość** - eksport do systemów księgowych (Q2 2026)
 - 🏦 **Banking APIs** - integracja z polskimi bankami (Business+)
 - 🛒 **E-commerce** - WooCommerce, Shopify, Allegro (Enterprise)
-- 📱 **Mobile App** - iOS/Android (planowane Q3 2026)m model: Free • Smart (49 PLN) • Business (99
-  PLN) • Enterprise (299 PLN)\*\*
+- 📱 **Mobile App** - iOS/Android (planowane Q3 2026)
+
+### Freemium Model
+
+Free • Smart (49 PLN) • Business (99 PLN) • Enterprise (299 PLN)
 
 [![Next.js](https://img.shields.io/badge/Next.js-15.5.4-black?logo=next.js)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19.1.1-blue?logo=react)](https://reactjs.org/)
