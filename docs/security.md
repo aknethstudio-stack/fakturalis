@@ -4,14 +4,16 @@
 
 1. **Content Security Policy (CSP)** - ochrona przed XSS
 2. **Security Headers** - HSTS, X-Frame-Options, etc.
-3. **hCaptcha** - ochrona przed botami
-4. **Supabase RLS** - Row Level Security, izolacja multi-tenant
-5. **Sentry** - monitoring błędów i bezpieczeństwa
-6. **Rate Limiting** - ograniczenia żądań per IP/user
+3. **hCaptcha** - ochrona przed botami i spam registracji
+4. **Supabase RLS** - Row Level Security, izolacja multi-tenant SaaS
+5. **Sentry** - monitoring błędów i bezpieczeństwa w production
+6. **Rate Limiting** - ograniczenia żądań per IP/user/plan
 7. **Input Sanitization** - DOMPurify dla HTML/XSS
-8. **Audit Logging** - logowanie krytycznych operacji
+8. **Audit Logging** - logowanie krytycznych operacji (faktury, subskrypcje)
 9. **Environment Validation** - walidacja zmiennych środowiskowych
 10. **Session Security** - bezpieczne sesje i ciasteczka
+11. **Payment Security** - PCI DSS compliance via Stripe/PayU
+12. **Subscription Security** - plan validation i usage limits
 
 ## Użycie
 
@@ -33,12 +35,19 @@ import { sanitizeClientData, sanitizeInvoiceData } from '@/lib/sanitize';
 const cleanData = sanitizeClientData(formData);
 ```
 
-### Audit Logging
+### Audit Logging & Subscription Security
 
 ```typescript
 import { auditLogger } from '@/lib/audit';
 
+// Log invoice operations
 await auditLogger.logInvoice('create', invoiceId, userId, request);
+
+// Log subscription changes
+await auditLogger.logSubscription('upgrade', userId, { from: 'free', to: 'smart' });
+
+// Log payment processing
+await auditLogger.logPayment('success', paymentId, userId, { amount: 49, plan: 'smart' });
 ```
 
 ### Environment Validation

@@ -4,14 +4,15 @@ This document provides context and guidelines for AI assistants working on the I
 
 ## 📋 Project Overview
 
-**InvoiceForge** is a modern SaaS invoicing application built with Next.js 15, React 19, TypeScript,
-Tailwind CSS, and Supabase.
+**InvoiceForge** is a modern freemium SaaS invoicing application built with Next.js 15, React 19,
+TypeScript, Tailwind CSS, and Supabase.
 
-- **Goal**: Professional invoicing system for Polish market
-- **Architecture**: Multi-tenant SaaS with Row Level Security
-- **Budget**: €0 startup cost (free tiers only)
-- **Timeline**: 16-week development plan
-- **Target**: Solo entrepreneurs and small businesses
+- **Goal**: Competitive invoicing system for Polish market with freemium model
+- **Architecture**: Multi-tenant SaaS with Row Level Security and subscription management
+- **Pricing**: Free (7 invoices) • Smart (49 PLN) • Business (99 PLN) • Enterprise (299 PLN)
+- **Budget**: €0 startup cost (free tiers only) + payment processing integration
+- **Timeline**: MVP complete, scaling phase with competitive pricing strategy
+- **Target**: Solo entrepreneurs, SMEs, and enterprise clients
 
 ## 🏗️ Technical Stack
 
@@ -62,6 +63,8 @@ Tailwind CSS, and Supabase.
 - **products** - Services/products catalog
 - **invoices** - Invoice headers
 - **invoice_items** - Invoice line items
+- **subscriptions** - User subscription plans and billing
+- **usage_limits** - Monthly usage tracking per user
 
 ### Key Relationships
 
@@ -146,6 +149,28 @@ npm run dev:turbo
 
 **Remember**: InvoiceForge aims to be a practical, working solution for Polish entrepreneurs.
 Prioritize functionality, performance, and user experience over theoretical perfection.
+
+## 💰 Business Model & Pricing
+
+### Freemium SaaS Strategy
+
+- **Free Plan**: 7 invoices/month - customer acquisition and validation
+- **Smart Plan**: 49 PLN/month - growing SMEs with unlimited invoices
+- **Business Plan**: 99 PLN/month - established businesses with teams
+- **Enterprise Plan**: 299 PLN/month - large organizations with custom needs
+
+### Competitive Positioning
+
+- **vs inFakt**: 2.5x price for modern tech stack and better UX
+- **vs Fakturownia**: 14% premium for React 19 performance
+- **vs iFirma**: 10% discount as competitive alternative
+- **Value Props**: Modern UI, real-time features, mobile-first, API access
+
+### Key Metrics
+
+- **Target CAC/CLV**: 1:7 to 1:12 ratio
+- **Conversion Goals**: 25% free-to-paid, <10% annual churn
+- **Plan Distribution**: 60% Smart, 30% Business, 10% Enterprise
 
 ## 📝 Code Documentation Standards
 
