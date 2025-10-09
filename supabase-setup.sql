@@ -321,7 +321,25 @@ insert into public.countries (code, name, name_en, eu_member) values
   ('CA', 'Kanada', 'Canada', false),
   ('CN', 'Chiny', 'China', false),
   ('JP', 'Japonia', 'Japan', false),
-  ('AU', 'Australia', 'Australia', false)
+  ('AU', 'Australia', 'Austral.ia', false)
 on conflict (code) do nothing;
+
+-- REPORT_HISTORY TABLE - Historia generowanych raportów
+create table if not exists public.report_history (
+  id uuid primary key default gen_random_uuid(),
+  owner_id uuid not null references auth.users(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  report_type text not null,
+  file_url text not null,
+  meta jsonb,
+  constraint report_history_type_not_blank check (btrim(report_type) <> '')
+);
+
+alter table public.report_history enable row level security;
+-- RLS: Polityki bezpieczeństwa dla report_history (tylko właściciel ma dostęp)
+create policy report_history_select on public.report_history for select using (owner_id = auth.uid());
+create policy report_history_insert on public.report_history for insert with check (owner_id = auth.uid());
+create policy report_history_update on public.report_history for update using (owner_id = auth.uid()) with check (owner_id = auth.uid());
+create policy report_history_delete on public.report_history for delete using (owner_id = auth.uid());
 
 -- DONE! Your Fakturalis database is ready! 🎉

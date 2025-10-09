@@ -12,7 +12,8 @@ export default function MobileMenu({ children }: MobileMenuProps) {
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    setIsMounted(true);
+    const id = window.requestAnimationFrame(() => setIsMounted(true));
+    return () => window.cancelAnimationFrame(id);
   }, []);
 
   useEffect(() => {

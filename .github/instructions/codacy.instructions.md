@@ -12,7 +12,6 @@ Configuration for AI behavior when interacting with Codacy's MCP Server
  - provider: gh
  - organization: aknethstudio-stack
  - repository: fakturalis
-- Only include these arguments if the project is a git repository
 - Avoid calling `git remote -v` unless really necessary
 
 ## CRITICAL: After ANY successful `edit_file` or `reapply` operation

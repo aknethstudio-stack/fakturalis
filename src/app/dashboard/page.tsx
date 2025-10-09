@@ -1,4 +1,5 @@
-import emailjs from '@emailjs/browser';
+// import nodemailer (wysyłka przez backend API)
+import ExcelJS from 'exceljs';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import {
@@ -15,7 +16,6 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import * as XLSX from 'xlsx';
 
 import { useAuth, useSupabase } from '@/hooks/use-supabase';
 import { logger } from '@/lib/logger';
@@ -111,6 +111,10 @@ export default function DashboardPage() {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  import type { Database } from '@/types/database';
+  type ReportHistoryRow = Database['public']['Tables']['report_history']['Row'];
+  const [reportHistory, setReportHistory] = useState<ReportHistoryRow[]>([]);
+  const [reportHistoryLoading, setReportHistoryLoading] = useState(false);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -127,23 +131,36 @@ export default function DashboardPage() {
       setError('');
 
       // Fetch total revenue
-      const { data: invoiceData, error: invoiceError } = await supabase
+      const invoiceRes = await supabase
         .from('invoices')
         .select('total_gross, status, due_date, created_at')
         .eq('owner_id', user.id);
-
-      if (invoiceError) throw invoiceError;
+      let invoiceData: Array<{ total_gross: number; status: string; due_date: string; created_at: string }> = [];
+      if (invoiceRes && typeof invoiceRes === 'object' && 'error' in invoiceRes && invoiceRes.error) {
+        logger.error('Błąd pobierania faktur', invoiceRes.error);
+      } else if (
+        invoiceRes &&
+        typeof invoiceRes === 'object' &&
+        'data' in invoiceRes &&
+        Array.isArray(invoiceRes.data)
+      ) {
+        invoiceData = invoiceRes.data;
+      }
 
       // Fetch clients count
-      const { count: clientsCount, error: clientsError } = await supabase
+      const clientsRes = await supabase
         .from('clients')
         .select('*', { count: 'exact', head: true })
         .eq('owner_id', user.id);
-
-      if (clientsError) throw clientsError;
+      let clientsCount = 0;
+      if (clientsRes && typeof clientsRes === 'object' && 'error' in clientsRes && clientsRes.error) {
+        throw clientsRes.error;
+      } else if (clientsRes && typeof clientsRes === 'object' && 'count' in clientsRes) {
+        clientsCount = typeof clientsRes.count === 'number' ? clientsRes.count : 0;
+      }
 
       // Fetch recent invoices with client data
-      const { data: recentInvoicesData, error: recentError } = await supabase
+      const recentInvoicesRes = await supabase
         .from('invoices')
         .select(
           `
@@ -154,8 +171,22 @@ export default function DashboardPage() {
         .eq('owner_id', user.id)
         .order('created_at', { ascending: false })
         .limit(5);
-
-      if (recentError) throw recentError;
+      let recentInvoicesData: (Invoice & { client: Client })[] = [];
+      if (
+        recentInvoicesRes &&
+        typeof recentInvoicesRes === 'object' &&
+        'error' in recentInvoicesRes &&
+        recentInvoicesRes.error
+      ) {
+        throw recentInvoicesRes.error;
+      } else if (
+        recentInvoicesRes &&
+        typeof recentInvoicesRes === 'object' &&
+        'data' in recentInvoicesRes &&
+        Array.isArray(recentInvoicesRes.data)
+      ) {
+        recentInvoicesData = recentInvoicesRes.data;
+      }
 
       // Calculate stats
       const totalRevenue =
@@ -199,7 +230,11 @@ export default function DashboardPage() {
 
       // --- MOCK: Zaawansowane wskaźniki (do wdrożenia z prawdziwymi danymi) ---
       // MRR: suma faktur cyklicznych z ostatniego miesiąca
-      const mrr = invoiceData?.filter((i) => i.status === 'paid').reduce((sum, i) => sum + (i.total_gross || 0), 0) / 6;
+      const mrr = Array.isArray(invoiceData)
+        ? invoiceData
+            .filter((i: { status: string }) => i.status === 'paid')
+            .reduce((sum: number, i: { total_gross?: number }) => sum + (i.total_gross || 0), 0) / 6
+        : 0;
       // Churn: % klientów, którzy nie wystawili faktury w ostatnich 3 miesiącach
       const churn = 5.2; // docelowo: oblicz na podstawie klientów i faktur
       // CLV: średnia wartość klienta
@@ -257,8 +292,33 @@ export default function DashboardPage() {
   useEffect(() => {
     if (user) {
       fetchDashboardStats();
+      // Pobierz historię raportów tylko dla płatnych planów
+      (async () => {
+        setReportHistoryLoading(true);
+        try {
+          // TODO: Zastąp poniższą logikę sprawdzania planu rzeczywistą walidacją subskrypcji
+          const isPaidPlan = true; // docelowo: sprawdź plan użytkownika
+          if (isPaidPlan) {
+            const result = await supabase
+              .from('report_history')
+              .select('*')
+              .eq('owner_id', user.id)
+              .order('created_at', { ascending: false })
+              .limit(20);
+            if (result && typeof result === 'object' && 'error' in result && result.error) {
+              logger.error('Błąd pobierania historii raportów', result.error);
+            } else if (result && typeof result === 'object' && 'data' in result && Array.isArray(result.data)) {
+              setReportHistory(result.data);
+            }
+          }
+        } catch (err) {
+          logger.error('Błąd pobierania historii raportów', err);
+        } finally {
+          setReportHistoryLoading(false);
+        }
+      })();
     }
-  }, [user, fetchDashboardStats]);
+  }, [user, fetchDashboardStats, supabase]);
 
   if (authLoading || loading) {
     return (
@@ -341,55 +401,95 @@ export default function DashboardPage() {
     URL.revokeObjectURL(url);
   };
 
-  // Eksport danych do Excela (XLSX)
-  const handleExportExcel = () => {
-    const wsData = [
-      ['Wskaźnik', 'Wartość'],
-      ['Łączny przychód', stats.totalRevenue],
-      ['MRR', stats.mrr],
-      ['Churn (%)', stats.churn],
-      ['CLV', stats.clv],
-      ['Liczba faktur', stats.totalInvoices],
-      ['Liczba klientów', stats.totalClients],
-      ['Zaległe płatności', stats.overduePayments],
-      [],
-      ['Przychody miesięczne', ''],
-      ...stats.monthlyRevenue.map((m) => [m.month, m.revenue]),
-      [],
-      ['Cashflow miesięczny', ''],
-      ...stats.cashflow.map((c) => [c.month, c.value]),
-      [],
-      ['Segmentacja klientów', ''],
-      ...stats.clientSegments.map((s) => [s.segment, s.count]),
-      [],
-      ['Top produkty/usługi', ''],
-      ...stats.topProducts.map((p) => [p.name, p.revenue]),
-      [],
-      ['Porównania okresowe', ''],
-      ...stats.periodComparisons.map((cmp) => [cmp.period, cmp.value]),
-    ];
-    const ws = XLSX.utils.aoa_to_sheet(wsData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Dashboard');
-    XLSX.writeFile(wb, `dashboard-eksport-${new Date().toISOString().slice(0, 10)}.xlsx`);
+  // Eksport danych do Excela (ExcelJS)
+  const handleExportExcel = async () => {
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet('Dashboard');
+    sheet.addRow(['Wskaźnik', 'Wartość']);
+    sheet.addRow(['Łączny przychód', stats.totalRevenue]);
+    sheet.addRow(['MRR', stats.mrr]);
+    sheet.addRow(['Churn (%)', stats.churn]);
+    sheet.addRow(['CLV', stats.clv]);
+    sheet.addRow(['Liczba faktur', stats.totalInvoices]);
+    sheet.addRow(['Liczba klientów', stats.totalClients]);
+    sheet.addRow(['Zaległe płatności', stats.overduePayments]);
+    sheet.addRow([]);
+    sheet.addRow(['Przychody miesięczne', '']);
+    stats.monthlyRevenue.forEach((m) => sheet.addRow([m.month, m.revenue]));
+    sheet.addRow([]);
+    sheet.addRow(['Cashflow miesięczny', '']);
+    stats.cashflow.forEach((c) => sheet.addRow([c.month, c.value]));
+    sheet.addRow([]);
+    sheet.addRow(['Segmentacja klientów', '']);
+    stats.clientSegments.forEach((s) => sheet.addRow([s.segment, s.count]));
+    sheet.addRow([]);
+    sheet.addRow(['Top produkty/usługi', '']);
+    stats.topProducts.forEach((p) => sheet.addRow([p.name, p.revenue]));
+    sheet.addRow([]);
+    sheet.addRow(['Porównania okresowe', '']);
+    stats.periodComparisons.forEach((cmp) => sheet.addRow([cmp.period, cmp.value]));
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `dashboard-eksport-${new Date().toISOString().slice(0, 10)}.xlsx`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    // Zapis do historii raportów w Supabase
+    if (user && supabase) {
+      try {
+        const result = await supabase
+          .from('report_history')
+          .insert([
+            {
+              owner_id: user.id,
+              report_type: 'excel',
+              file_url: url,
+              meta: {
+                exported_at: new Date().toISOString(),
+                stats,
+              },
+            },
+          ])
+          .select();
+        if (result && typeof result === 'object' && 'error' in result && result.error) {
+          logger.error('Błąd zapisu raportu do historii', result.error);
+        } else {
+          logger.info('Raport Excel zapisany w historii');
+        }
+      } catch (err) {
+        logger.error('Błąd zapisu raportu do historii', err);
+      }
+    }
   };
 
-  // Funkcja wysyłania e-maila z raportem
+  // Funkcja wysyłania e-maila z raportem przez backend (Next.js API)
   const handleSendEmail = async () => {
     try {
-      await emailjs.send(
-        'service_fakturalis',
-        'template_dashboard_report',
-        {
+      const res = await fetch('/api/report/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           mrr: stats.mrr,
           churn: stats.churn,
           clv: stats.clv,
-          cashflow: JSON.stringify(stats.cashflow),
-          // Dodaj inne metryki
-        },
-        'user_xxxxxxxx', // Wstaw swój publiczny klucz EmailJS
-      );
-      alert('Raport został wysłany na e-mail!');
+          cashflow: stats.cashflow,
+          clientSegments: stats.clientSegments,
+          topProducts: stats.topProducts,
+          periodComparisons: stats.periodComparisons,
+          // Dodaj inne metryki według potrzeb
+        }),
+      });
+      if (res.ok) {
+        alert('Raport został wysłany na e-mail!');
+      } else {
+        alert('Błąd wysyłania e-maila: ' + (await res.text()));
+      }
     } catch (error) {
       alert('Błąd wysyłania e-maila: ' + error);
     }
@@ -418,6 +518,36 @@ export default function DashboardPage() {
       startY: 24,
     });
     doc.save('dashboard-raport.pdf');
+
+    // Zapis do historii raportów w Supabase
+    if (user && supabase) {
+      const url = '';
+      (async () => {
+        try {
+          const result = await supabase
+            .from('report_history')
+            .insert([
+              {
+                owner_id: user.id,
+                report_type: 'pdf',
+                file_url: url, // Brak linku do pliku PDF (generowany lokalnie)
+                meta: {
+                  exported_at: new Date().toISOString(),
+                  stats,
+                },
+              },
+            ])
+            .select();
+          if (result && typeof result === 'object' && 'error' in result && result.error) {
+            logger.error('Błąd zapisu raportu do historii', result.error);
+          } else {
+            logger.info('Raport PDF zapisany w historii');
+          }
+        } catch (err) {
+          logger.error('Błąd zapisu raportu do historii', err);
+        }
+      })();
+    }
   };
   // Funkcja integracji
   const handleIntegrations = () => {
@@ -691,6 +821,51 @@ export default function DashboardPage() {
               </button>
             </div>
           )}
+          {/* Historia raportów dla płatnych planów */}
+          <div className='mt-8'>
+            <h2 className='flex items-center gap-2 text-lg font-semibold text-gray-900'>
+              <BsFileEarmarkText className='h-5 w-5 text-green-600' />
+              Historia raportów (płatne plany)
+            </h2>
+            {reportHistoryLoading ? (
+              <div className='mt-2 text-gray-500'>Ładowanie historii raportów...</div>
+            ) : reportHistory.length === 0 ? (
+              <div className='mt-2 text-gray-500'>Brak wygenerowanych raportów</div>
+            ) : (
+              <div className='mt-2 overflow-x-auto'>
+                <table className='min-w-full rounded-lg border text-sm'>
+                  <thead>
+                    <tr className='bg-gray-100'>
+                      <th className='px-3 py-2 text-left'>Data wygenerowania</th>
+                      <th className='px-3 py-2 text-left'>Typ raportu</th>
+                      <th className='px-3 py-2 text-left'>Akcja</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {reportHistory.map((r) => (
+                      <tr key={r.id} className='border-b'>
+                        <td className='px-3 py-2'>
+                          {r.meta?.exported_at ? new Date(r.meta.exported_at).toLocaleString('pl-PL') : '-'}
+                        </td>
+                        <td className='px-3 py-2'>
+                          {r.report_type === 'excel' ? 'Excel' : r.report_type === 'pdf' ? 'PDF' : r.report_type}
+                        </td>
+                        <td className='px-3 py-2'>
+                          {r.report_type === 'excel' && r.file_url ? (
+                            <a href={r.file_url} download className='text-blue-600 hover:underline'>
+                              Pobierz
+                            </a>
+                          ) : (
+                            <span className='text-gray-400'>Brak pliku</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

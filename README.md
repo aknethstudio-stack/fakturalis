@@ -264,7 +264,7 @@ Zbudujmy razem najlepszy polski system fakturowania!
 
 ✅ Kompletny dashboard analityczny: wszystkie wskaźniki biznesowe, interaktywne wykresy (MRR, churn, CLV, cashflow, segmentacja, top produkty, porównania okresowe), szybkie akcje, pełna prezentacja danych zgodnie z wymaganiami rynku polskiego
 ✅ Eksport danych: CSV, Excel (XLSX), PDF (jsPDF)
-✅ Powiadomienia e-mail (EmailJS)
+✅ Powiadomienia e-mail (wysyłka przez backend, nodemailer)
 ✅ Pełna responsywność mobilna
 ✅ Onboarding użytkownika
 ✅ Integracje: KSeF, Upstash, Sentry, Vercel

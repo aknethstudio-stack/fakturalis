@@ -12,8 +12,10 @@ export default function AccountDropdown() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { user, signOut } = useAuth();
 
+  // Ustawiamy isMounted bezpośrednio po zamontowaniu komponentu
   useEffect(() => {
-    setIsMounted(true);
+    const id = window.requestAnimationFrame(() => setIsMounted(true));
+    return () => window.cancelAnimationFrame(id);
   }, []);
 
   useEffect(() => {
