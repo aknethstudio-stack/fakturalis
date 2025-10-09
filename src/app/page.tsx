@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import {
   BsArrowRight as ArrowRight,
-  BsBarChart as BarChart3,
   BsFileText as FileText,
   BsBox as Package,
   BsPeople as Users,
@@ -92,20 +91,6 @@ export default function Page() {
                 <Link
                   href='/products'
                   className='mt-4 inline-flex items-center text-sm font-medium text-purple-600 hover:text-purple-700'>
-                  Więcej <ArrowRight className='ml-1 h-4 w-4' />
-                </Link>
-              </div>
-
-              {/* Raporty */}
-              <div className='rounded-xl bg-white p-8 shadow-sm ring-1 ring-gray-200'>
-                <div className='w-fit rounded-lg bg-orange-100 p-3'>
-                  <BarChart3 className='h-6 w-6 text-orange-600' />
-                </div>
-                <h3 className='mt-4 text-lg font-semibold text-gray-900'>Raporty</h3>
-                <p className='mt-2 text-sm text-gray-600'>Analizy sprzedaży, przychody i zestawienia do księgowości</p>
-                <Link
-                  href='/reports'
-                  className='mt-4 inline-flex items-center text-sm font-medium text-orange-600 hover:text-orange-700'>
                   Więcej <ArrowRight className='ml-1 h-4 w-4' />
                 </Link>
               </div>
