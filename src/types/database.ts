@@ -4,6 +4,41 @@
 export type Database = {
   public: {
     Tables: {
+      report_history: {
+        Row: {
+          id: string;
+          owner_id: string;
+          created_at: string;
+          report_type: string;
+          file_url: string;
+          meta: Record<string, unknown> | null;
+        };
+        Insert: {
+          id?: string;
+          owner_id: string;
+          created_at?: string;
+          report_type: string;
+          file_url: string;
+          meta?: Record<string, unknown> | null;
+        };
+        Update: {
+          id?: string;
+          owner_id?: string;
+          created_at?: string;
+          report_type?: string;
+          file_url?: string;
+          meta?: Record<string, unknown> | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'report_history_owner_id_fkey';
+            columns: ['owner_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       clients: {
         Row: {
           id: string;

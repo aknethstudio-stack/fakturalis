@@ -37,6 +37,8 @@ import {
 
 type Invoice = Database['public']['Tables']['invoices']['Row'];
 type Client = Database['public']['Tables']['clients']['Row'];
+import type { Database } from '@/types/database';
+type ReportHistoryRow = Database['public']['Tables']['report_history']['Row'];
 
 interface DashboardStats {
   totalRevenue: number;
@@ -91,7 +93,7 @@ function StatCard({ title, value, icon: Icon, trend, color }: StatCardProps) {
 }
 
 export default function DashboardPage() {
-  const { user, loading: authLoading } = useAuth();
+  const [reportHistory, setReportHistory] = useState<ReportHistoryRow[]>([]);
   const supabase = useSupabase();
   const router = useRouter();
   const [stats, setStats] = useState<DashboardStats>({
