@@ -264,13 +264,15 @@ npm run release:minor # Minor version
 
 ## 🤝 Współpraca
 
-### Przed Contribucją
+### Przed kontrybucją
 
 1. Fork repozytorium
-2. Utwórz branch: `feature/INV-123-opis`
+2. Utwórz branch: `feature/opis` (nazwa nie wymaga numeru ticketu)
 3. Sprawdź jakość: `npm run check`
-4. Commit z Conventional Commits
+4. Commit zgodny z Conventional Commits
 5. Utwórz Pull Request
+
+**Branch naming** nie wymaga numerów ticketów ani formalnych zgłoszeń. Zgłaszanie issue na GitHub jest możliwe i mile widziane – możesz raportować błędy, pomysły i zadania według własnych potrzeb.
 
 ### Standards
 

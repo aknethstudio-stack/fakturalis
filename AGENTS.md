@@ -246,10 +246,12 @@ const result = calc(a, b); // calculate invoice total
 
 ### Branch Naming Conventions
 
-- feature/INV-123-short-description
-- fix/INV-456-bug-description
+- feature/short-description
+- fix/short-description
 - release/1.2.3
 - hotfix/1.2.4
+
+Branch naming nie wymaga numerów ticketów ani formalnych zgłoszeń. Zgłaszanie issue na GitHub jest dostępne dla wszystkich użytkowników – możesz raportować błędy, pomysły i zadania zgodnie z potrzebami projektu.
 
 ### Commit Message Format
 

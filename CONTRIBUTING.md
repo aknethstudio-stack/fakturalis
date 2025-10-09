@@ -83,28 +83,28 @@ We use Git Flow semantics with `main` and `develop` branches:
 
 Branch naming:
 
-- Features: `feature/KEY-short-description`
-- Fixes: `fix/KEY-short-description` (or `feat/...` if it’s a new feature)
+- Features: `feature/short-description` (no ticket required)
+- Fixes: `fix/short-description` (or `feat/...` if it’s a new feature)
 - Releases: `release/x.y.z`
 - Hotfixes: `hotfix/x.y.z`
 
-Examples:
+**Branch naming** nie wymaga numerów ticketów ani formalnych zgłoszeń. Zgłaszanie issue na GitHub jest możliwe i mile widziane – możesz raportować błędy, pomysły i zadania według własnych potrzeb.
 
-    git checkout -b feature/INV-123-export-to-pdf
-    git checkout -b fix/INV-456-currency-rounding
-    git checkout -b release/1.2.3
-    git checkout -b hotfix/1.2.4
+Przykłady:
 
-Typical flow:
+git checkout -b feature/dashboard-analytics
+git checkout -b fix/currency-rounding
+git checkout -b release/1.2.3
+git checkout -b hotfix/1.2.4
 
-1. Branch from `develop` for features/fixes.
-2. Open a PR back to `develop` when ready.
-3. For releases, create `release/x.y.z` from `develop`, finish QA, then PR to `main` and `develop`.
-4. For urgent production fixes, create `hotfix/x.y.z` from `main`, then merge to `main` and back to
-   `develop`.
+Typowy flow:
 
-Note: You may use CLI helpers (e.g., git-flow-avh), but it’s optional — standard Git commands are
-sufficient as long as the branching model is respected.
+1. Branch z `develop` dla funkcji/poprawek.
+2. PR do `develop` gdy gotowe.
+3. Release: `release/x.y.z` z `develop`, QA, PR do `main` i `develop`.
+4. Hotfix: `hotfix/x.y.z` z `main`, merge do `main` i z powrotem do `develop`.
+
+Możesz używać git-flow lub zwykłych komend git — ważne, by zachować model branchowania.
 
 ---
 
