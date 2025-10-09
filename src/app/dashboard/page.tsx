@@ -1,3 +1,4 @@
+'use client';
 // import nodemailer (wysyłka przez backend API)
 import ExcelJS from 'exceljs';
 import jsPDF from 'jspdf';
@@ -34,12 +35,10 @@ import {
   BsPieChart,
   BsStar,
 } from 'react-icons/bs';
+type ReportHistoryRow = Database['public']['Tables']['report_history']['Row'];
 
 type Invoice = Database['public']['Tables']['invoices']['Row'];
 type Client = Database['public']['Tables']['clients']['Row'];
-import type { Database } from '@/types/database';
-type ReportHistoryRow = Database['public']['Tables']['report_history']['Row'];
-
 interface DashboardStats {
   totalRevenue: number;
   totalInvoices: number;
@@ -93,6 +92,7 @@ function StatCard({ title, value, icon: Icon, trend, color }: StatCardProps) {
 }
 
 export default function DashboardPage() {
+  const { user, loading: authLoading } = useAuth();
   const [reportHistory, setReportHistory] = useState<ReportHistoryRow[]>([]);
   const supabase = useSupabase();
   const router = useRouter();
@@ -113,9 +113,6 @@ export default function DashboardPage() {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  import type { Database } from '@/types/database';
-  type ReportHistoryRow = Database['public']['Tables']['report_history']['Row'];
-  const [reportHistory, setReportHistory] = useState<ReportHistoryRow[]>([]);
   const [reportHistoryLoading, setReportHistoryLoading] = useState(false);
 
   // Redirect if not authenticated
@@ -847,7 +844,9 @@ export default function DashboardPage() {
                     {reportHistory.map((r) => (
                       <tr key={r.id} className='border-b'>
                         <td className='px-3 py-2'>
-                          {r.meta?.exported_at ? new Date(r.meta.exported_at).toLocaleString('pl-PL') : '-'}
+                          {typeof r.meta?.exported_at === 'string' && r.meta.exported_at
+                            ? new Date(r.meta.exported_at).toLocaleString('pl-PL')
+                            : '-'}
                         </td>
                         <td className='px-3 py-2'>
                           {r.report_type === 'excel' ? 'Excel' : r.report_type === 'pdf' ? 'PDF' : r.report_type}
