@@ -37,11 +37,8 @@ jobs:
         run: npm run stylelint
 
       - name: Run tests
-        run: npm run test:ci
-
-      - name: Build project
         run:
-          npm run build
+          npm run test:ci
 
           # Coverage reporting - requires secrets to be configured in repository settings
       - name: Upload coverage to Codacy

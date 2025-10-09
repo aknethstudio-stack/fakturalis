@@ -72,8 +72,13 @@ export default function ClientsPage() {
     fetchClients();
   }, [fetchClients]);
 
+  useEffect(() => {
+    if (!user && typeof window !== 'undefined') {
+      router.push('/auth/login');
+    }
+  }, [user, router]);
+
   if (!user) {
-    router.push('/auth/login');
     return null;
   }
 

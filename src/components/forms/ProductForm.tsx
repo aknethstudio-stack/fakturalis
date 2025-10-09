@@ -157,7 +157,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
 
       if (onSuccess) {
         onSuccess(result.data);
-      } else {
+      } else if (typeof window !== 'undefined') {
         router.push('/products');
       }
 

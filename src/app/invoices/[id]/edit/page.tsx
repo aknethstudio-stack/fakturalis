@@ -62,12 +62,16 @@ export default function EditInvoicePage({ params }: EditInvoicePageProps) {
 
   const handleSubmit = () => {
     // Redirect back to invoice details
-    router.push(`/invoices/${invoiceId}`);
+    if (typeof window !== 'undefined') {
+      router.push(`/invoices/${invoiceId}`);
+    }
   };
 
   const handleCancel = () => {
     // Redirect back to invoice details
-    router.push(`/invoices/${invoiceId}`);
+    if (typeof window !== 'undefined') {
+      router.push(`/invoices/${invoiceId}`);
+    }
   };
 
   useEffect(() => {

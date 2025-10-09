@@ -48,7 +48,9 @@ function LoginForm() {
     try {
       setIsLoading(true);
       await signInWithEmail(data.email, data.password, { captchaToken });
-      router.push(redirectTo);
+      if (typeof window !== 'undefined') {
+        router.push(redirectTo);
+      }
     } catch (error) {
       logger.error('Login error', error, {
         email: data.email,

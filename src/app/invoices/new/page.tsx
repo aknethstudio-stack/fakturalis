@@ -13,7 +13,10 @@ export default function NewInvoicePage() {
         <p className='mt-2 text-sm text-gray-600'>Utwórz nową fakturę dla swojego klienta</p>
       </div>
 
-      <InvoiceForm onSuccess={() => router.push('/invoices')} onCancel={() => router.push('/invoices')} />
+      <InvoiceForm
+        onSuccess={() => typeof window !== 'undefined' && router.push('/invoices')}
+        onCancel={() => typeof window !== 'undefined' && router.push('/invoices')}
+      />
     </div>
   );
 }

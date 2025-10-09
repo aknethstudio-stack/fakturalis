@@ -82,7 +82,9 @@ function InvoiceDetails({ invoiceId }: InvoiceDetailsProps) {
 
       if (invoiceError) throw invoiceError;
 
-      router.push('/invoices');
+      if (typeof window !== 'undefined') {
+        router.push('/invoices');
+      }
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Nie udało się usunąć faktury');
     } finally {

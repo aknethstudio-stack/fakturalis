@@ -325,7 +325,7 @@ export default function InvoiceForm({ invoice, onSuccess, onCancel }: InvoiceFor
               <p>
                 Aby utworzyć fakturę, musisz najpierw dodać klienta.{' '}
                 <button
-                  onClick={() => router.push('/clients/new')}
+                  onClick={() => typeof window !== 'undefined' && router.push('/clients/new')}
                   className='font-medium underline hover:text-yellow-600'>
                   Dodaj klienta
                 </button>
@@ -781,7 +781,7 @@ export default function InvoiceForm({ invoice, onSuccess, onCancel }: InvoiceFor
       <div className='flex justify-end space-x-3 border-t border-gray-200 pt-6'>
         <button
           type='button'
-          onClick={onCancel || (() => router.push('/invoices'))}
+          onClick={onCancel || (() => typeof window !== 'undefined' && router.push('/invoices'))}
           className='rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none'>
           Anuluj
         </button>

@@ -1,8 +1,41 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { BsBox, BsCurrencyDollar, BsFileEarmarkText, BsPeople } from 'react-icons/bs';
+import type { ReactNode } from 'react';
+import { BsBox, BsCurrencyDollar, BsFileEarmarkText, BsGrid3X3Gap, BsPeople } from 'react-icons/bs';
 import AccountDropdown from './AccountDropdown';
 import MobileMenu from './MobileMenu';
+
+const NAV_LINKS: {
+  href: string;
+  label: string;
+  icon: ReactNode;
+}[] = [
+  {
+    href: '/dashboard',
+    label: 'Dashboard',
+    icon: <BsGrid3X3Gap size={16} />,
+  },
+  {
+    href: '/invoices',
+    label: 'Faktury',
+    icon: <BsFileEarmarkText size={16} />,
+  },
+  {
+    href: '/clients',
+    label: 'Klienci',
+    icon: <BsPeople size={16} />,
+  },
+  {
+    href: '/products',
+    label: 'Produkty',
+    icon: <BsBox size={16} />,
+  },
+  {
+    href: '/pricing',
+    label: 'Cennik',
+    icon: <BsCurrencyDollar size={16} />,
+  },
+];
 
 export default function Header() {
   return (
@@ -19,22 +52,12 @@ export default function Header() {
 
           {/* Desktop Navigation */}
           <nav className='header__nav'>
-            <Link href='/invoices' className='header__nav-link'>
-              <BsFileEarmarkText size={16} />
-              <span>Faktury</span>
-            </Link>
-            <Link href='/clients' className='header__nav-link'>
-              <BsPeople size={16} />
-              <span>Klienci</span>
-            </Link>
-            <Link href='/products' className='header__nav-link'>
-              <BsBox size={16} />
-              <span>Produkty</span>
-            </Link>
-            <Link href='/pricing' className='header__nav-link'>
-              <BsCurrencyDollar size={16} />
-              <span>Cennik</span>
-            </Link>
+            {NAV_LINKS.map((link) => (
+              <Link key={link.href} href={link.href} className='header__nav-link'>
+                {link.icon}
+                <span>{link.label}</span>
+              </Link>
+            ))}
           </nav>
 
           {/* Desktop User Menu */}
@@ -46,22 +69,12 @@ export default function Header() {
           <div className='header__mobile-container'>
             <MobileMenu>
               <nav className='header__mobile-nav'>
-                <Link href='/invoices' className='header__nav-link'>
-                  <BsFileEarmarkText size={16} />
-                  <span>Faktury</span>
-                </Link>
-                <Link href='/clients' className='header__nav-link'>
-                  <BsPeople size={16} />
-                  <span>Klienci</span>
-                </Link>
-                <Link href='/products' className='header__nav-link'>
-                  <BsBox size={16} />
-                  <span>Produkty</span>
-                </Link>
-                <Link href='/pricing' className='header__nav-link'>
-                  <BsCurrencyDollar size={16} />
-                  <span>Cennik</span>
-                </Link>
+                {NAV_LINKS.map((link) => (
+                  <Link key={link.href} href={link.href} className='header__nav-link'>
+                    {link.icon}
+                    <span>{link.label}</span>
+                  </Link>
+                ))}
               </nav>
               <div className='header__mobile-user'>
                 <AccountDropdown />

@@ -59,7 +59,9 @@ export default function SignUpPage() {
     try {
       setIsLoading(true);
       await signUpWithEmail(data.email, data.password, { captchaToken });
-      router.push('/auth/login?message=Sprawdź swój email i potwierdź konto');
+      if (typeof window !== 'undefined') {
+        router.push('/auth/login?message=Sprawdź swój email i potwierdź konto');
+      }
     } catch (error) {
       logger.error('Signup error', error, {
         email: data.email,
