@@ -1,6 +1,6 @@
 # Testing Guide
 
-Test utilities and patterns for the InvoiceForge SaaS project.
+Test utilities and patterns for the Fakturalis SaaS project.
 
 ## Testing Strategy
 

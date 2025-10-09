@@ -2,7 +2,7 @@
 
 ## Competitive Freemium Pricing
 
-InvoiceForge uses a competitive freemium model designed to capture market share while maintaining
+Fakturalis uses a competitive freemium model designed to capture market share while maintaining
 healthy unit economics.
 
 ### Plan Structure
@@ -22,7 +22,7 @@ healthy unit economics.
 Price Spectrum (Smart Plan equivalent):
 inFakt:        19 PLN  (Budget option)
 Fakturownia:   43 PLN  (Market standard)
-InvoiceForge:  49 PLN  (Value premium +14%)
+Fakturalis:  49 PLN  (Value premium +14%)
 iFirma:        54 PLN  (Established player)
 ```
 
@@ -186,6 +186,6 @@ iFirma:        54 PLN  (Established player)
 - **Feature Adoption**: Track usage and proactively suggest upgrades
 - **Feedback Loop**: Regular customer surveys and feature requests
 
-This pricing strategy positions InvoiceForge as a premium value alternative in the Polish invoicing
+This pricing strategy positions Fakturalis as a premium value alternative in the Polish invoicing
 market, leveraging modern technology and superior user experience to justify competitive pricing
 while maintaining strong unit economics.

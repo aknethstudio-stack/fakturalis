@@ -1,4 +1,4 @@
--- InvoiceForge Database Setup - PostgreSQL/Supabase
+-- fakturalis Database Setup - PostgreSQL/Supabase
 -- Skopiuj i wklej do Supabase SQL Editor: https://supabase.com/dashboard/project/xavvzxbpmqkbfsugkxgt/sql
 -- @language postgresql
 
@@ -160,4 +160,4 @@ create index if not exists products_owner_name_idx on public.products(owner_id, 
 create index if not exists invoices_owner_issue_date_idx on public.invoices(owner_id, issue_date);
 create index if not exists invoices_owner_status_idx on public.invoices(owner_id, status);
 
--- DONE! Your InvoiceForge database is ready! 🎉
+-- DONE! Your Fakturalis database is ready! 🎉

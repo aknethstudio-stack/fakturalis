@@ -1,4 +1,4 @@
--- InvoiceForge Database Setup - PostgreSQL/Supabase
+-- Fakturalis Database Setup - PostgreSQL/Supabase
 -- Skopiuj i wklej do Supabase SQL Editor: https://supabase.com/dashboard/project/xavvzxbpmqkbfsugkxgt/sql
 -- @language postgresql
 
@@ -324,4 +324,4 @@ insert into public.countries (code, name, name_en, eu_member) values
   ('AU', 'Australia', 'Australia', false)
 on conflict (code) do nothing;
 
--- DONE! Your InvoiceForge database is ready! 🎉
+-- DONE! Your Fakturalis database is ready! 🎉

@@ -1,4 +1,4 @@
-# 🔒 Bezpieczeństwo InvoiceForge
+# 🔒 Bezpieczeństwo Fakturalis
 
 ## Zaimplementowane warstwy bezpieczeństwa
 

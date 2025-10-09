@@ -2,7 +2,7 @@
 
 ## Przegląd
 
-InvoiceForge używa **Supabase Auth** z dodatkowymi zabezpieczeniami **hCaptcha** dla ochrony przed
+Fakturalis używa **Supabase Auth** z dodatkowymi zabezpieczeniami **hCaptcha** dla ochrony przed
 botami.
 
 ## Komponenty systemu

@@ -1,6 +1,6 @@
 # Polityka bezpieczeństwa (SECURITY.md)
 
-Dziękujemy za zainteresowanie bezpieczeństwem projektu InvoiceForge. Poniższa polityka opisuje, jak
+Dziękujemy za zainteresowanie bezpieczeństwem projektu Fakturalis. Poniższa polityka opisuje, jak
 odpowiedzialnie zgłaszać podatności, czego oczekiwać po naszej stronie oraz dobre praktyki w trakcie
 testów.
 
@@ -8,7 +8,7 @@ testów.
 
 ## Zakres
 
-- Ten dokument dotyczy kodu i pakietów w repozytorium InvoiceForge oraz oficjalnych wdrożeń
+- Ten dokument dotyczy kodu i pakietów w repozytorium Fakturalis oraz oficjalnych wdrożeń
   utrzymywanych przez właścicieli projektu.
 - Nie testuj i nie atakuj instancji należących do osób trzecich.
 - Jeśli podejrzewasz lukę w zależnej bibliotece, rozważ równoległe zgłoszenie do jej autorów
@@ -107,7 +107,7 @@ odnotowane w changelogu/relase notes.
 - Bezpieczeństwo / zgłoszenia: akneth.studio@gmail.com
 - Formularz: https://akneth-studio.vercel.app/contact
 
-Dziękujemy za pomoc w utrzymaniu bezpieczeństwa InvoiceForge!
+Dziękujemy za pomoc w utrzymaniu bezpieczeństwa Fakturalis!
 
 ---
 

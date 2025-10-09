@@ -1,6 +1,6 @@
 /**
  * KSeF Connection API Route
- * Connects user's KSeF portal credentials to InvoiceForge
+ * Connects user's KSeF portal credentials to Fakturalis
  */
 
 import { ksefClient } from '@/lib/ksef/client';

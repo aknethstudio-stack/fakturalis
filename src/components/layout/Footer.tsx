@@ -10,9 +10,9 @@ export default function Footer() {
           <div>
             <div className='footer__logo'>
               <div className='footer__logo-icon'>
-                <Image src='/invoiceforge.svg' alt='InvoiceForge Logo' width={40} height={40} />
+                <Image src='/fakturalis.svg' alt='Fakturalis Logo' width={40} height={40} />
               </div>
-              <span className='footer__logo-text'>InvoiceForge</span>
+              <span className='footer__logo-text'>Fakturalis</span>
             </div>
             <p className='footer__description'>System fakturowania dla polskich firm.</p>
           </div>
@@ -76,8 +76,8 @@ export default function Footer() {
             <h3 className='footer__section-title'>Kontakt</h3>
             <ul className='footer__links'>
               <li>
-                <a href='mailto:kontakt@invoiceforge.pl' className='footer__link'>
-                  kontakt@invoiceforge.pl
+                <a href='mailto:kontakt@fakturalis.pl' className='footer__link'>
+                  kontakt@fakturalis.pl
                 </a>
               </li>
               <li>
@@ -91,7 +91,7 @@ export default function Footer() {
 
         {/* Copyright */}
         <div className='footer__copyright'>
-          <p>© {new Date().getFullYear()} InvoiceForge. Wszystkie prawa zastrzeżone.</p>
+          <p>© {new Date().getFullYear()} Fakturalis. Wszystkie prawa zastrzeżone.</p>
         </div>
       </div>
     </footer>

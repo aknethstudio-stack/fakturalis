@@ -1,4 +1,4 @@
-# 📊 Logging Guidelines - InvoiceForge
+# 📊 Logging Guidelines - Fakturalis
 
 ## 🎯 **Zasady logowania**
 

@@ -1,7 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
-  "name": "invoiceforge",
+  "name": "fakturalis",
   "buildCommand": "npm run build",
   "installCommand": "npm install",
   "devCommand": "npm run dev",
@@ -9,7 +9,7 @@
   "redirects": [
     {
       "source": "/view-source",
-      "destination": "https://github.com/aknethstudio-stack/invoiceforge",
+      "destination": "https://github.com/aknethstudio-stack/fakturalis",
       "permanent": true
     }
   ],

@@ -1,4 +1,21 @@
-'use client';
+import emailjs from '@emailjs/browser';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import {
+  Bar,
+  BarChart,
+  Cell,
+  Legend,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
+import * as XLSX from 'xlsx';
 
 import { useAuth, useSupabase } from '@/hooks/use-supabase';
 import { logger } from '@/lib/logger';
@@ -6,7 +23,17 @@ import { cn } from '@/lib/utils';
 import type { Database } from '@/types/database';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
-import { BsBarChart, BsCalendarEvent, BsCashStack, BsCreditCard, BsFileEarmarkText, BsPeople } from 'react-icons/bs';
+import {
+  BsBarChart,
+  BsCalendarEvent,
+  BsCashStack,
+  BsCreditCard,
+  BsFileEarmarkText,
+  BsGraphUp,
+  BsPeople,
+  BsPieChart,
+  BsStar,
+} from 'react-icons/bs';
 
 type Invoice = Database['public']['Tables']['invoices']['Row'];
 type Client = Database['public']['Tables']['clients']['Row'];
@@ -18,6 +45,13 @@ interface DashboardStats {
   overduePayments: number;
   monthlyRevenue: Array<{ month: string; revenue: number }>;
   recentInvoices: Array<Invoice & { client: Client }>;
+  mrr: number;
+  churn: number;
+  clv: number;
+  cashflow: Array<{ month: string; value: number }>;
+  clientSegments: Array<{ segment: string; count: number }>;
+  topProducts: Array<{ name: string; revenue: number }>;
+  periodComparisons: Array<{ period: string; value: number; prevValue: number }>;
 }
 
 interface StatCardProps {
@@ -67,6 +101,13 @@ export default function DashboardPage() {
     overduePayments: 0,
     monthlyRevenue: [],
     recentInvoices: [],
+    mrr: 0,
+    churn: 0,
+    clv: 0,
+    cashflow: [],
+    clientSegments: [],
+    topProducts: [],
+    periodComparisons: [],
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -156,6 +197,33 @@ export default function DashboardPage() {
         });
       }
 
+      // --- MOCK: Zaawansowane wskaźniki (do wdrożenia z prawdziwymi danymi) ---
+      // MRR: suma faktur cyklicznych z ostatniego miesiąca
+      const mrr = invoiceData?.filter((i) => i.status === 'paid').reduce((sum, i) => sum + (i.total_gross || 0), 0) / 6;
+      // Churn: % klientów, którzy nie wystawili faktury w ostatnich 3 miesiącach
+      const churn = 5.2; // docelowo: oblicz na podstawie klientów i faktur
+      // CLV: średnia wartość klienta
+      const clv = totalClients ? totalRevenue / totalClients : 0;
+      // Cashflow: uproszczony, na podstawie przychodów miesięcznych
+      const cashflow = monthlyRevenue.map((m) => ({ month: m.month, value: m.revenue }));
+      // Segmentacja klientów: mock
+      const clientSegments = [
+        { segment: 'Mikrofirmy', count: Math.floor(totalClients * 0.5) },
+        { segment: 'SME', count: Math.floor(totalClients * 0.3) },
+        { segment: 'Enterprise', count: Math.floor(totalClients * 0.2) },
+      ];
+      // Top produkty: mock
+      const topProducts = [
+        { name: 'Usługa A', revenue: 12000 },
+        { name: 'Produkt B', revenue: 8000 },
+        { name: 'Konsultacja C', revenue: 5000 },
+      ];
+      // Porównania okresowe: mock
+      const periodComparisons = [
+        { period: 'Miesiąc', value: totalRevenue, prevValue: totalRevenue * 0.88 },
+        { period: 'Rok', value: totalRevenue * 12, prevValue: totalRevenue * 10 },
+      ];
+
       setStats({
         totalRevenue,
         totalInvoices,
@@ -163,6 +231,13 @@ export default function DashboardPage() {
         overduePayments,
         monthlyRevenue,
         recentInvoices: (recentInvoicesData || []) as Array<Invoice & { client: Client }>,
+        mrr,
+        churn,
+        clv,
+        cashflow,
+        clientSegments,
+        topProducts,
+        periodComparisons,
       });
 
       logger.info('Dashboard stats fetched successfully', {
@@ -211,18 +286,193 @@ export default function DashboardPage() {
     }).format(amount);
   };
 
+  // Eksport danych do CSV
+  const handleExportCSV = () => {
+    const rows = [
+      ['Wskaźnik', 'Wartość'],
+      ['Łączny przychód', stats.totalRevenue],
+      ['MRR', stats.mrr],
+      ['Churn (%)', stats.churn],
+      ['CLV', stats.clv],
+      ['Liczba faktur', stats.totalInvoices],
+      ['Liczba klientów', stats.totalClients],
+      ['Zaległe płatności', stats.overduePayments],
+    ];
+    // Dodaj miesięczne przychody
+    rows.push(['', '']);
+    rows.push(['Przychody miesięczne', '']);
+    stats.monthlyRevenue.forEach((m) => {
+      rows.push([m.month, m.revenue]);
+    });
+    // Dodaj cashflow
+    rows.push(['', '']);
+    rows.push(['Cashflow miesięczny', '']);
+    stats.cashflow.forEach((c) => {
+      rows.push([c.month, c.value]);
+    });
+    // Dodaj segmentację klientów
+    rows.push(['', '']);
+    rows.push(['Segmentacja klientów', '']);
+    stats.clientSegments.forEach((s) => {
+      rows.push([s.segment, s.count]);
+    });
+    // Dodaj top produkty
+    rows.push(['', '']);
+    rows.push(['Top produkty/usługi', '']);
+    stats.topProducts.forEach((p) => {
+      rows.push([p.name, p.revenue]);
+    });
+    // Dodaj porównania okresowe
+    rows.push(['', '']);
+    rows.push(['Porównania okresowe', '']);
+    stats.periodComparisons.forEach((cmp) => {
+      rows.push([cmp.period, cmp.value]);
+    });
+    // Konwersja do CSV
+    const csvContent = rows.map((r) => r.join(';')).join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `dashboard-eksport-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  // Eksport danych do Excela (XLSX)
+  const handleExportExcel = () => {
+    const wsData = [
+      ['Wskaźnik', 'Wartość'],
+      ['Łączny przychód', stats.totalRevenue],
+      ['MRR', stats.mrr],
+      ['Churn (%)', stats.churn],
+      ['CLV', stats.clv],
+      ['Liczba faktur', stats.totalInvoices],
+      ['Liczba klientów', stats.totalClients],
+      ['Zaległe płatności', stats.overduePayments],
+      [],
+      ['Przychody miesięczne', ''],
+      ...stats.monthlyRevenue.map((m) => [m.month, m.revenue]),
+      [],
+      ['Cashflow miesięczny', ''],
+      ...stats.cashflow.map((c) => [c.month, c.value]),
+      [],
+      ['Segmentacja klientów', ''],
+      ...stats.clientSegments.map((s) => [s.segment, s.count]),
+      [],
+      ['Top produkty/usługi', ''],
+      ...stats.topProducts.map((p) => [p.name, p.revenue]),
+      [],
+      ['Porównania okresowe', ''],
+      ...stats.periodComparisons.map((cmp) => [cmp.period, cmp.value]),
+    ];
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Dashboard');
+    XLSX.writeFile(wb, `dashboard-eksport-${new Date().toISOString().slice(0, 10)}.xlsx`);
+  };
+
+  // Funkcja wysyłania e-maila z raportem
+  const handleSendEmail = async () => {
+    try {
+      await emailjs.send(
+        'service_fakturalis',
+        'template_dashboard_report',
+        {
+          mrr: stats.mrr,
+          churn: stats.churn,
+          clv: stats.clv,
+          cashflow: JSON.stringify(stats.cashflow),
+          // Dodaj inne metryki
+        },
+        'user_xxxxxxxx', // Wstaw swój publiczny klucz EmailJS
+      );
+      alert('Raport został wysłany na e-mail!');
+    } catch (error) {
+      alert('Błąd wysyłania e-maila: ' + error);
+    }
+  };
+  // Funkcja podglądu mobilnego
+  const handleMobilePreview = () => {
+    window.open('/dashboard?mobile=1', '_blank', 'width=375,height=812');
+  };
+  // Funkcja onboarding
+  const handleOnboarding = () => {
+    window.location.href = '/onboarding';
+  };
+  // Funkcja eksportu PDF
+  const handleExportPDF = () => {
+    const doc = new jsPDF();
+    doc.text('Raport analityczny Fakturalis', 14, 16);
+    autoTable(doc, {
+      head: [['Metryka', 'Wartość']],
+      body: [
+        ['MRR', stats.mrr],
+        ['Churn', stats.churn],
+        ['CLV', stats.clv],
+        ['Cashflow', stats.cashflow.map((c) => `${c.month}: ${c.value}`).join(', ')],
+        // Dodaj inne metryki według potrzeb
+      ],
+      startY: 24,
+    });
+    doc.save('dashboard-raport.pdf');
+  };
+  // Funkcja integracji
+  const handleIntegrations = () => {
+    window.location.href = '/settings/integrations';
+  };
+
   return (
     <div className='space-y-6'>
-      {/* Header */}
+      {/* Header + Eksport */}
       <div className='flex items-center justify-between'>
         <div>
           <h1 className='text-2xl font-bold text-gray-900'>Dashboard</h1>
           <p className='text-gray-600'>Przegląd Twojej działalności</p>
         </div>
-        <div className='text-sm text-gray-500'>Ostatnia aktualizacja: {new Date().toLocaleString('pl-PL')}</div>
+        <div className='flex items-center gap-4'>
+          <div className='text-sm text-gray-500'>Ostatnia aktualizacja: {new Date().toLocaleString('pl-PL')}</div>
+          <button
+            onClick={handleExportCSV}
+            className='rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-blue-700'>
+            Eksportuj dane (CSV)
+          </button>
+          <button
+            onClick={handleExportExcel}
+            className='rounded bg-green-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-green-700'>
+            Eksportuj Excel
+          </button>
+          <button
+            onClick={handleExportPDF}
+            className='rounded bg-orange-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-orange-700'>
+            Eksportuj PDF
+          </button>
+          <button
+            onClick={handleSendEmail}
+            className='rounded bg-purple-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-purple-700'>
+            Wyślij e-mail
+          </button>
+          <button
+            onClick={handleMobilePreview}
+            className='rounded bg-pink-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-pink-700'>
+            Mobile preview
+          </button>
+          <button
+            onClick={handleOnboarding}
+            className='rounded bg-gray-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-gray-700'>
+            Onboarding
+          </button>
+          <button
+            onClick={handleIntegrations}
+            className='rounded bg-yellow-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-yellow-700'>
+            Integracje
+          </button>
+        </div>
       </div>
 
-      {/* Stats Cards */}
+      {/* Stats Cards + Advanced KPIs */}
       <div className='grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4'>
         <StatCard
           title='Łączny przychód'
@@ -231,36 +481,167 @@ export default function DashboardPage() {
           trend='12%'
           color='green'
         />
+        <StatCard
+          title='MRR (przychód cykliczny)'
+          value={formatCurrency(stats.mrr)}
+          icon={BsGraphUp}
+          trend='6%'
+          color='blue'
+        />
+        <StatCard title='Churn (%)' value={stats.churn.toFixed(1) + '%'} icon={BsPieChart} trend='-1%' color='orange' />
+        <StatCard title='CLV (wartość klienta)' value={formatCurrency(stats.clv)} icon={BsStar} color='green' />
+      </div>
+      <div className='mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4'>
         <StatCard title='Liczba faktur' value={stats.totalInvoices} icon={BsFileEarmarkText} trend='8%' color='blue' />
         <StatCard title='Liczba klientów' value={stats.totalClients} icon={BsPeople} trend='15%' color='blue' />
         <StatCard title='Zaległe płatności' value={stats.overduePayments} icon={BsCreditCard} color='red' />
+        <StatCard
+          title='Cashflow (mies.)'
+          value={formatCurrency(
+            Array.isArray(stats.cashflow) &&
+              stats.cashflow.length > 0 &&
+              typeof stats.cashflow[stats.cashflow.length - 1]?.value === 'number'
+              ? (stats.cashflow[stats.cashflow.length - 1]?.value ?? 0)
+              : 0,
+          )}
+          icon={BsBarChart}
+          color='orange'
+        />
       </div>
 
-      {/* Charts Section */}
+      {/* Charts & Analytics Section */}
       <div className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
-        {/* Monthly Revenue Chart */}
+        {/* Monthly Revenue Chart (Line) */}
         <div className='rounded-lg border bg-white p-6 shadow-sm'>
           <div className='mb-4 flex items-center justify-between'>
             <h2 className='text-lg font-semibold text-gray-900'>Przychody miesięczne</h2>
             <BsBarChart className='h-5 w-5 text-gray-500' />
           </div>
+          <ResponsiveContainer width='100%' height={220}>
+            <LineChart data={stats.monthlyRevenue} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+              <XAxis dataKey='month' />
+              <YAxis />
+              <Tooltip formatter={(value: number) => formatCurrency(value)} />
+              <Legend />
+              <Line type='monotone' dataKey='revenue' stroke='#2563eb' strokeWidth={3} dot={{ r: 4 }} name='Przychód' />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Cashflow Chart (Bar) */}
+        <div className='rounded-lg border bg-white p-6 shadow-sm'>
+          <div className='mb-4 flex items-center justify-between'>
+            <h2 className='text-lg font-semibold text-gray-900'>Cashflow miesięczny</h2>
+            <BsBarChart className='h-5 w-5 text-orange-500' />
+          </div>
+          <ResponsiveContainer width='100%' height={220}>
+            <BarChart data={stats.cashflow} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+              <XAxis dataKey='month' />
+              <YAxis />
+              <Tooltip formatter={(value: number) => formatCurrency(value)} />
+              <Legend />
+              <Bar dataKey='value' fill='#f59e42' name='Cashflow' />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      <div className='mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2'>
+        {/* Segmentacja klientów (Pie) */}
+        <div className='rounded-lg border bg-white p-6 shadow-sm'>
+          <div className='mb-4 flex items-center justify-between'>
+            <h2 className='text-lg font-semibold text-gray-900'>Segmentacja klientów</h2>
+            <BsPieChart className='h-5 w-5 text-blue-500' />
+          </div>
+          <ResponsiveContainer width='100%' height={220}>
+            <PieChart>
+              <Pie
+                data={stats.clientSegments}
+                dataKey='count'
+                nameKey='segment'
+                cx='50%'
+                cy='50%'
+                outerRadius={80}
+                label>
+                {stats.clientSegments.map((entry, idx) => (
+                  <Cell key={`cell-${idx}`} fill={['#2563eb', '#22c55e', '#f59e42'][idx % 3]} />
+                ))}
+              </Pie>
+              <Tooltip />
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Top produkty/usługi (Bar) */}
+        <div className='rounded-lg border bg-white p-6 shadow-sm'>
+          <div className='mb-4 flex items-center justify-between'>
+            <h2 className='text-lg font-semibold text-gray-900'>Top produkty/usługi</h2>
+            <BsStar className='h-5 w-5 text-yellow-500' />
+          </div>
+          <ResponsiveContainer width='100%' height={220}>
+            <BarChart data={stats.topProducts} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+              <XAxis dataKey='name' />
+              <YAxis />
+              <Tooltip formatter={(value: number) => formatCurrency(value)} />
+              <Legend />
+              <Bar dataKey='revenue' fill='#2563eb' name='Przychód' />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      <div className='mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2'>
+        {/* Segmentacja klientów */}
+        <div className='rounded-lg border bg-white p-6 shadow-sm'>
+          <div className='mb-4 flex items-center justify-between'>
+            <h2 className='text-lg font-semibold text-gray-900'>Segmentacja klientów</h2>
+            <BsPieChart className='h-5 w-5 text-blue-500' />
+          </div>
           <div className='space-y-3'>
-            {stats.monthlyRevenue.map((month, index) => (
-              <div key={index} className='flex items-center justify-between'>
-                <span className='text-sm text-gray-600'>{month.month}</span>
-                <div className='flex items-center space-x-2'>
-                  <div
-                    className='h-2 rounded bg-blue-500'
-                    style={{
-                      width: `${Math.max(
-                        (month.revenue / Math.max(...stats.monthlyRevenue.map((m) => m.revenue))) * 100,
-                        2,
-                      )}%`,
-                      minWidth: '20px',
-                    }}
-                  />
-                  <span className='text-sm font-medium text-gray-900'>{formatCurrency(month.revenue)}</span>
-                </div>
+            {stats.clientSegments.map((seg, idx) => (
+              <div key={idx} className='flex items-center justify-between'>
+                <span className='text-sm text-gray-600'>{seg.segment}</span>
+                <span className='text-sm font-medium text-gray-900'>{seg.count}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Top produkty/usługi */}
+        <div className='rounded-lg border bg-white p-6 shadow-sm'>
+          <div className='mb-4 flex items-center justify-between'>
+            <h2 className='text-lg font-semibold text-gray-900'>Top produkty/usługi</h2>
+            <BsStar className='h-5 w-5 text-yellow-500' />
+          </div>
+          <div className='space-y-3'>
+            {stats.topProducts.map((prod, idx) => (
+              <div key={idx} className='flex items-center justify-between'>
+                <span className='text-sm text-gray-600'>{prod.name}</span>
+                <span className='text-sm font-medium text-gray-900'>{formatCurrency(prod.revenue)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className='mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2'>
+        {/* Porównania okresowe */}
+        <div className='rounded-lg border bg-white p-6 shadow-sm'>
+          <div className='mb-4 flex items-center justify-between'>
+            <h2 className='text-lg font-semibold text-gray-900'>Porównania okresowe</h2>
+            <BsGraphUp className='h-5 w-5 text-green-500' />
+          </div>
+          <div className='space-y-3'>
+            {stats.periodComparisons.map((cmp, idx) => (
+              <div key={idx} className='flex items-center justify-between'>
+                <span className='text-sm text-gray-600'>{cmp.period}</span>
+                <span className='text-sm font-medium text-gray-900'>
+                  {formatCurrency(cmp.value)}
+                  <span className='ml-2 text-xs text-gray-500'>
+                    ({cmp.prevValue ? (((cmp.value - cmp.prevValue) / cmp.prevValue) * 100).toFixed(1) : '0'}%)
+                  </span>
+                </span>
               </div>
             ))}
           </div>

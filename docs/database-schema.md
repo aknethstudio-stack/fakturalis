@@ -1,6 +1,6 @@
 # Database Schema
 
-Multi-tenant PostgreSQL schema for InvoiceForge SaaS with Row Level Security.
+Multi-tenant PostgreSQL schema for Fakturalis SaaS with Row Level Security.
 
 ## Subscription & Billing Tables
 

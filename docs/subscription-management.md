@@ -2,7 +2,7 @@
 
 ## Plan Management System
 
-InvoiceForge implements a robust subscription management system supporting freemium model with
+Fakturalis implements a robust subscription management system supporting freemium model with
 usage-based limitations and upgrade paths.
 
 ### Core Components
@@ -262,7 +262,7 @@ async function createPayUPayment(userId: string, planName: PlanName) {
   const order = {
     customerIp: await getUserIP(),
     merchantPosId: process.env.PAYU_MERCHANT_ID,
-    description: `InvoiceForge ${planName} - 1 miesiąc`,
+    description: `Fakturalis ${planName} - 1 miesiąc`,
     currencyCode: 'PLN',
     totalAmount: getPlanPrice(planName) * 100, // PayU uses grosze
     products: [

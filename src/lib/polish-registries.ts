@@ -2,7 +2,7 @@
  * Polish Business Registries Integration
  * Integracja z polskimi rejestrami firm: GUS, KRS, CEIDG
  *
- * @author InvoiceForge
+ * @author Fakturalis
  * @description Kompleksowy service do pobierania danych z wszystkich polskich rejestrów
  */
 

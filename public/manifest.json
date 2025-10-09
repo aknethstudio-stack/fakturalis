@@ -1,6 +1,6 @@
 {
-  "name": "InvoiceForge - Profesjonalne faktury online",
-  "short_name": "InvoiceForge",
+  "name": "Fakturalis - Profesjonalne faktury online",
+  "short_name": "Fakturalis",
   "description": "Nowoczesny system fakturowania dla polskich przedsiębiorców",
   "start_url": "/",
   "display": "standalone",
@@ -41,7 +41,7 @@
   "categories": ["business", "finance", "productivity"],
   "screenshots": [
     {
-      "src": "/invoiceforge.png",
+  "src": "/fakturalis.png",
       "sizes": "1200x630",
       "type": "image/png",
       "form_factor": "wide"

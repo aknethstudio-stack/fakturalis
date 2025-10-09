@@ -2,7 +2,7 @@
 
 ## Overview
 
-InvoiceForge używa **Codacy** jako głównego narzędzia do monitorowania jakości kodu i coverage.
+Fakturalis używa **Codacy** jako głównego narzędzia do monitorowania jakości kodu i coverage.
 Codacy oferuje lepsze wsparcie dla TypeScript/React projektów niż tradycyjne narzędzia.
 
 ## 🎯 Korzyści Codacy vs Alternatives
@@ -28,8 +28,8 @@ Codacy oferuje lepsze wsparcie dla TypeScript/React projektów niż tradycyjne n
 
 Repository jest już skonfigurowany w Codacy:
 
-- **URL**: <https://app.codacy.com/gh/aknethstudio-stack/invoiceforge/dashboard>
-- **Project ID**: `6386ac73fb494afa81495a0ecbf6f0fb`
+- **URL**: <https://app.codacy.com/gh/aknethstudio-stack/fakturalis/dashboard>
+- **Project ID**: `6386ac73fb494afa81495a0ecbf6f0fb` # (zmień w Codacy jeśli to nowy projekt)
 
 ### 2. Coverage Configuration
 
@@ -108,10 +108,10 @@ coverage:
 
 #### Dashboard Links
 
-- **Main Dashboard**: <https://app.codacy.com/gh/aknethstudio-stack/invoiceforge/dashboard>
+- **Main Dashboard**: <https://app.codacy.com/gh/aknethstudio-stack/fakturalis/dashboard>
 - **Coverage Details**:
-  <https://app.codacy.com/gh/aknethstudio-stack/invoiceforge/coverage/dashboard>
-- **Issues Overview**: <https://app.codacy.com/gh/aknethstudio-stack/invoiceforge/issues>
+  <https://app.codacy.com/gh/aknethstudio-stack/fakturalis/coverage/dashboard>
+- **Issues Overview**: <https://app.codacy.com/gh/aknethstudio-stack/fakturalis/issues>
 
 ## 🎯 Goals
 
@@ -181,7 +181,7 @@ Codacy monitoruje również bezpieczeństwo repozytorium. Aby uzyskać najwyższ
 
 ```bash
 # Navigate to repository settings
-# https://github.com/aknethstudio-stack/invoiceforge/settings/branches
+# https://github.com/aknethstudio-stack/fakturalis/settings/branches
 
 # Add protection rule for 'master' branch with:
 # - Require pull request reviews (1 approver)
@@ -195,8 +195,8 @@ Codacy monitoruje również bezpieczeństwo repozytorium. Aby uzyskać najwyższ
 
 - [Codacy Documentation](https://docs.codacy.com/)
 - [Coverage Reporter](https://github.com/codacy/codacy-coverage-reporter)
-- [Quality Settings](https://app.codacy.com/gh/aknethstudio-stack/invoiceforge/settings)
-- [InvoiceForge Dashboard](https://app.codacy.com/gh/aknethstudio-stack/invoiceforge/dashboard)
+- [Quality Settings](https://app.codacy.com/gh/aknethstudio-stack/fakturalis/settings)
+- [Fakturalis Dashboard](https://app.codacy.com/gh/aknethstudio-stack/fakturalis/dashboard)
 
 ---
 

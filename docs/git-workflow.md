@@ -1,6 +1,6 @@
 # Git Workflow
 
-Git Flow workflow for InvoiceForge development.
+Git Flow workflow for Fakturalis development.
 
 ## Branch Structure
 

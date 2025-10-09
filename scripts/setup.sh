@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# InvoiceForge Setup Script for Unix/Linux/macOS
+# Fakturalis Setup Script for Unix/Linux/macOS
 # This script sets up the development environment
 
 set -e  # Exit on any error
@@ -39,7 +39,7 @@ check_command() {
 
 echo
 echo "========================================"
-echo "  InvoiceForge Development Setup"
+echo "  Fakturalis Development Setup"
 echo "========================================"
 echo
 

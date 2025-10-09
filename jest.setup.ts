@@ -1,5 +1,5 @@
 /**
- * Jest setup for InvoiceForge
+ * Jest setup for Fakturalis
  * - Deterministic timezone
  * - Placeholders for common test utilities (Testing Library, MSW)
  *

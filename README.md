@@ -1,4 +1,4 @@
-# 🧾 InvoiceForge
+# 🧾 Fakturalis
 
 > **Nowoczesny system fakturowania SaaS dla polskich przedsiębiorców**  
 > Twórz faktury zgodne z KSeF, zarządzaj klientami i produktami w jednym miejscu.
@@ -7,49 +7,31 @@
 
 ### Legal Compliance
 
-- ✅ **Stawka VAT 23%** - standardowa stawka podatkowa + inne stawki
-- ✅ **Walidacja NIP** - weryfikacja numerów podatkowych z algorytmem kontrolnym
-- ✅ **Format adresów** - polskie kody pocztowe (XX-XXX) + walidacja
-- ✅ **Język interfejsu** - w pełni spolszczony UI i komunikaty
-- ✅ **Waluta PLN** - polski złoty jako domyślna + multi-currency
-- ✅ **JPK Integration** - pliki JPK_V7, JPK_FA, JPK_EWP, JPK_MAG (Smart+)
+- **Stawka VAT 23%** – domyślna stawka podatku VAT, obsługa innych stawek
+- **Walidacja NIP** – algorytm kontrolny, automatyczna weryfikacja numerów podatkowych
+- **Format adresów** – polskie kody pocztowe (XX-XXX), walidacja adresów
+- **Język interfejsu** – pełna polonizacja UI i komunikatów
+- **Waluta** – PLN jako domyślna, wsparcie multi-currency
+- **Zgodność z KSeF** – pełna integracja z Krajowym Systemem e-Faktur
+- **Eksport JPK** – generowanie plików JPK_V7, JPK_FA, JPK_EWP, JPK_MAG (Smart+)
 
 ### Konkurencyjne Pozycjonowanie
 
-| Feature           | InvoiceForge | iFirma    | Fakturownia | inFakt  |
-| ----------------- | ------------ | --------- | ----------- | ------- |
-| **Free Plan**     | 7 faktur     | ❌        | 3 faktury   | ❌      |
-| **Modern UI**     | React 19     | Legacy    | Legacy      | Legacy  |
-| **API Access**    | Business+    | Premium   | Premium     | Premium |
-| **Mobile PWA**    | ✅           | Częściowo | Częściowo   | ❌      |
-| **Price (Smart)** | 49 PLN       | 54 PLN    | 43 PLN      | 19 PLN  |
+| Feature       | Fakturalis | iFirma    | Fakturownia | inFakt  |
+| ------------- | ---------- | --------- | ----------- | ------- |
+| Free Plan     | 7 faktur   | ❌        | 3 faktury   | ❌      |
+| Modern UI     | React 19   | Legacy    | Legacy      | Legacy  |
+| API Access    | Business+  | Premium   | Premium     | Premium |
+| Mobile PWA    | ✅         | Częściowo | Częściowo   | ❌      |
+| Price (Smart) | 49 PLN     | 54 PLN    | 43 PLN      | 19 PLN  |
 
-### Integracje & API
+## Szybki start
 
-- 🔄 **KSeF** - Krajowy System e-Faktur (Q1 2026)
-- 📊 **Księgowość** - eksport do systemów księgowych (Q2 2026)
-- 🏦 **Banking APIs** - integracja z polskimi bankami (Business+)
-- 🛒 **E-commerce** - WooCommerce, Shopify, Allegro (Enterprise)
-- 📱 **Mobile App** - iOS/Android (planowane Q3 2026)
+```bash
+git clone https://github.com/aknethstudio-stack/fakturalis.git
+cd fakturalis
+```
 
-### Freemium Model
-
-Free • Smart (49 PLN) • Business (99 PLN) • Enterprise (299 PLN)
-
-[![Next.js](https://img.shields.io/badge/Next.js-15.5.4-black?logo=next.js)](https://nextjs.org/)
-[![React](https://img.shields.io/badge/React-19.1.1-blue?logo=react)](https://reactjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.9.2-blue?logo=typescript)](https://www.typescriptlang.org/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-4.1.13-06B6D4?logo=tailwindcss)](https://tailwindcss.com/)
-[![Supabase](https://img.shields.io/badge/Supabase-2.58.0-3ECF8E?logo=supabase)](https://supabase.io/)
-
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/6386ac73fb494afa81495a0ecbf6f0fb)](https://app.codacy.com/gh/aknethstudio-stack/invoiceforge/dashboard)
-[![Codacy Badge](https://app.codacy.com/project/badge/Coverage/6386ac73fb494afa81495a0ecbf6f0fb)](https://app.codacy.com/gh/aknethstudio-stack/invoiceforge/dashboard)
-
-## ✨ Funkcjonalności
-
-### 💰 Modele Subskrypcji
-
-- **Free Plan (0 PLN)** - Do 7 faktur miesięcznie, podstawowe funkcje
 - **Smart Plan (49 PLN)** - Nielimitowane faktury, 3 użytkowników, JPK
 - **Business Plan (99 PLN)** - 10 użytkowników, magazyny, OCR, API
 - **Enterprise Plan (299 PLN)** - Unlimited users, white-label, SLA 99.9%
@@ -92,25 +74,19 @@ Free • Smart (49 PLN) • Business (99 PLN) • Enterprise (299 PLN)
 - **npm** >=10.x
 - **Git** najnowsza wersja
 
-### Instalacja
+## Instalacja zależności i konfiguracja
 
 ```bash
-# Klonowanie repozytorium
-git clone https://github.com/aknethstudio-stack/invoiceforge.git
-cd invoiceforge
-
-# Instalacja zależności i konfiguracja
 npm run setup
-
-# Konfiguracja środowiska
-cp .env.example .env.local
-# Edytuj .env.local z własnymi wartościami
 ```
 
-### Rozwój Aplikacji
+## Konfiguracja środowiska
 
-⚠️ **WAŻNE**: Projekt zoptymalizowany pod słabszy sprzęt (4GB RAM). Zalecamy production-mode
-development:
+```bash
+cp .env.example .env.local
+```
+
+## Edytuj .env.local z własnymi wartościami
 
 ```bash
 # 🏆 Zalecany workflow (production-mode development)
@@ -131,34 +107,19 @@ npm run check
 ### Tech Stack
 
 - **Frontend**: Next.js 15.5.4 + React 19.1.1 + TypeScript 5.9.2
-- **Styling**: Tailwind CSS v4.1.13 + SCSS
-- **Backend**: Supabase PostgreSQL + Auth + Storage
-- **Validation**: Zod 4.1.11 + React Hook Form 7.63.0
-- **UI Components**: Headless UI 2.2.9 + React Icons 5.5.0
-- **PDF Generation**: jsPDF 3.0.3 + jsPDF-AutoTable 5.0.2
+- **Backend**: Supabase PostgreSQL + Supabase Auth + Realtime
+- **PDF**: jsPDF + jsPDF-AutoTable
+- **Testy**: Jest + Testing Library
 
-### Bezpieczeństwo
+### Struktura katalogów
 
-- **Row Level Security (RLS)** - izolacja danych między użytkownikami
-- **Multi-tenant** - każda tabela ma pole `owner_id`
-- **Type Safety** - pełne typowanie bazy danych w TypeScript
-
-## 📁 Struktura Projektu
-
-```text
-invoiceforge/
-├── src/
-│   ├── app/              # Next.js App Router - strony i API
-│   ├── components/       # Komponenty React (forms/, layout/, ui/)
-│   ├── hooks/           # Custom hooks (Supabase integration)
-│   ├── lib/             # Utilities, validations, database client
-│   ├── styles/          # Globalne style CSS/SCSS
-│   └── types/           # Definicje TypeScript
-├── public/              # Statyczne pliki (ikony, obrazy)
-├── __tests__/           # Testy jednostkowe i integracyjne
-├── .vscode/             # Konfiguracja VS Code
-└── local-notes/         # Dokumentacja rozwoju
-```
+│ ├── lib/ # Utilities, validations, database client
+│ ├── styles/ # Globalne style CSS/SCSS
+│ └── types/ # Definicje TypeScript
+├── public/ # Statyczne pliki (ikony, obrazy)
+├── **tests**/ # Testy jednostkowe i integracyjne
+├── .vscode/ # Konfiguracja VS Code
+└── local-notes/ # Dokumentacja rozwoju
 
 ## 🧪 Testowanie
 
@@ -206,14 +167,6 @@ npm run release:minor # Minor version
 
 ## 🇵🇱 Polska Specyfikacja
 
-### Zgodność Prawna
-
-- ✅ **Stawka VAT 23%** - standardowa stawka podatkowa
-- ✅ **Walidacja NIP** - weryfikacja numerów podatkowych
-- ✅ **Format adresów** - polskie kody pocztowe (XX-XXX)
-- ✅ **Język interfejsu** - w pełni spolszczony
-- ✅ **Waluta PLN** - polski złoty jako domyślna
-
 ### Integracje
 
 - 🔄 **KSeF** - Krajowy System e-Faktur (planowane)
@@ -245,12 +198,11 @@ npm run release:minor # Minor version
 
 - 📋 [**AGENTS.md**](./AGENTS.md) - Przewodnik dla AI asystentów
 - 💰 [**Pricing Strategy**](./docs/pricing-strategy.md) - Model biznesowy i konkurencja
-- � [**Subscription Management**](./docs/subscription-management.md) - Zarządzanie subskrypcjami
 - 📈 [**Strategic Plan**](./local-notes/PLAN.md) - Kompletny plan biznesowy
 
 ### Rozwój i Konfiguracja
 
-- �🔐 [**Auth System**](./docs/auth-system.md) - System uwierzytelniania i bezpieczeństwa
+- 🔐 [**Auth System**](./docs/auth-system.md) - System uwierzytelniania i bezpieczeństwa
 - 🛡️ [**hCaptcha Setup**](./docs/hcaptcha-setup.md) - Konfiguracja zabezpieczeń anti-bot
 - 📊 [**Codacy Integration**](./docs/codacy-integration.md) - Analiza jakości kodu
 - 🔒 [**Branch Protection**](./docs/github-branch-protection.md) - Bezpieczeństwo repozytorium
@@ -295,7 +247,7 @@ npm run release:minor # Minor version
 
 ## 🌟 Wsparcie Projektu
 
-Jeśli InvoiceForge pomaga Ci w prowadzeniu biznesu, rozważ wsparcie rozwoju:
+Jeśli Fakturalis pomaga Ci w prowadzeniu biznesu, rozważ wsparcie rozwoju:
 
 - ⭐ **Star** - oznacz projekt gwiazdką na GitHub
 - 🐛 **Issues** - zgłaszaj błędy i sugestie
@@ -305,3 +257,16 @@ Jeśli InvoiceForge pomaga Ci w prowadzeniu biznesu, rozważ wsparcie rozwoju:
 ## 🇵🇱 Misja
 
 Zbudujmy razem najlepszy polski system fakturowania!
+
+## 🚀 Roadmap
+
+### Q4 2025: MVP Completion & Soft Launch
+
+✅ Kompletny dashboard analityczny: wszystkie wskaźniki biznesowe, interaktywne wykresy (MRR, churn, CLV, cashflow, segmentacja, top produkty, porównania okresowe), szybkie akcje, pełna prezentacja danych zgodnie z wymaganiami rynku polskiego
+✅ Eksport danych: CSV, Excel (XLSX), PDF (jsPDF)
+✅ Powiadomienia e-mail (EmailJS)
+✅ Pełna responsywność mobilna
+✅ Onboarding użytkownika
+✅ Integracje: KSeF, Upstash, Sentry, Vercel
+✅ Szybkie akcje: eksport, powiadomienia, onboarding, mobile, integracje
+✅ Przewaga konkurencyjna nad Fakturownia/iFirma/inFakt potwierdzona

@@ -1,6 +1,6 @@
 # hCaptcha Setup Guide
 
-## Konfiguracja hCaptcha dla InvoiceForge
+## Konfiguracja hCaptcha dla Fakturalis
 
 ### 1. Utwórz konto hCaptcha
 
@@ -13,7 +13,7 @@
 1. Kliknij "New Site" w dashboardzie
 2. Wypełnij formularz:
    - **Hostname**: `localhost` (dla developmentu) + twoja domena produkcyjna
-   - **Site Name**: `InvoiceForge`
+   - **Site Name**: `Fakturalis`
    - **Difficulty**: `Easy` (zalecane dla UX)
 3. Zapisz ustawienia
 
@@ -42,7 +42,7 @@ NEXT_PUBLIC_HCAPTCHA_SITE_KEY=your_site_key_here
 
 #### Production (Vercel)
 
-- Hostname: twoja domena (np. `invoiceforge.vercel.app`)
+- Hostname: twoja domena (np. `fakturalis.vercel.app`)
 - Dodaj zmienną środowiskową w Vercel dashboard
 
 ### 6. Testowanie

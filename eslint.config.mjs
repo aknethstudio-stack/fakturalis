@@ -1,5 +1,5 @@
 /**
- * ESLint Flat config (ESLint 9+) for InvoiceForge
+ * ESLint Flat config (ESLint 9+) for Fakturalis
  * - Next.js core-web-vitals rules
  * - TypeScript support
  * - Prettier integration (plugin:prettier/recommended)

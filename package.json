@@ -1,8 +1,8 @@
 {
-  "name": "invoiceforge",
-  "displayName": "InvoiceForge",
+  "name": "fakturalis",
+  "displayName": "Fakturalis",
   "version": "1.0.0",
-  "description": "InvoiceForge - Program do fakturowania",
+  "description": "Fakturalis - Program do fakturowania",
   "main": "index.js",
   "scripts": {
     "dev": "next dev",
@@ -72,15 +72,15 @@
   "private": true,
   "author": "AKNETH Studio Katarzyna Pawłowska-Malesa",
   "license": "AGPL-3.0-only",
-  "homepage": "https://invoiceforge.pl",
+  "homepage": "https://fakturalis.pl",
   "repository": {
     "type": "git",
-    "url": "https://github.com/aknethstudio-stack/invoiceforge"
+    "url": "https://github.com/aknethstudio-stack/fakturalis"
   },
   "funding": [
     {
       "type": "commercial",
-      "url": "https://invoiceforge.pl/pricing"
+      "url": "https://fakturalis.pl/pricing"
     },
     {
       "type": "patreon",
@@ -97,6 +97,7 @@
   ],
   "type": "module",
   "dependencies": {
+    "@emailjs/browser": "^4.4.1",
     "@hcaptcha/react-hcaptcha": "^1.12.1",
     "@headlessui/react": "^2.2.9",
     "@hookform/resolvers": "^5.2.2",
@@ -123,7 +124,9 @@
     "react-hook-form": "^7.63.0",
     "react-icons": "^5.5.0",
     "react-to-print": "^3.1.1",
+    "recharts": "^3.2.1",
     "tailwind-merge": "^3.3.1",
+    "xlsx": "^0.18.5",
     "xml2js": "^0.6.2",
     "zod": "^4.1.11"
   },

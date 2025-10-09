@@ -1,4 +1,4 @@
-// Database types for InvoiceForge
+// Database types for Fakturalis
 // These types correspond to the database schema defined in local-notes/data-model.md
 
 export type Database = {

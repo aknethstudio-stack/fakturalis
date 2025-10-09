@@ -45,9 +45,9 @@ export default function Header() {
           {/* Logo */}
           <Link href='/' className='header__logo'>
             <div className='header__logo-icon'>
-              <Image src='/invoiceforge.svg' alt='InvoiceForge Logo' width={40} height={40} priority />
+              <Image src='/fakturalis.svg' alt='Fakturalis Logo' width={40} height={40} priority />
             </div>
-            <span className='header__logo-text'>InvoiceForge</span>
+            <span className='header__logo-text'>Fakturalis</span>
           </Link>
 
           {/* Desktop Navigation */}

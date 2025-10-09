@@ -6,21 +6,21 @@ export const rateLimiters = {
     redis: Redis.fromEnv(),
     limiter: Ratelimit.slidingWindow(5, '15 m'),
     analytics: true,
-    prefix: 'invoiceforge:auth',
+    prefix: 'fakturalis:auth',
   }),
 
   api: new Ratelimit({
     redis: Redis.fromEnv(),
     limiter: Ratelimit.slidingWindow(60, '1 m'),
     analytics: true,
-    prefix: 'invoiceforge:api',
+    prefix: 'fakturalis:api',
   }),
 
   critical: new Ratelimit({
     redis: Redis.fromEnv(),
     limiter: Ratelimit.slidingWindow(10, '1 m'),
     analytics: true,
-    prefix: 'invoiceforge:critical',
+    prefix: 'fakturalis:critical',
   }),
 };
 

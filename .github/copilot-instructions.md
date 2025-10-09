@@ -1,4 +1,4 @@
-# InvoiceForge - AI Coding Agent Instructions
+# Fakturalis - AI Coding Agent Instructions
 
 > **⚠️ CRITICAL**: This project uses **Git Flow** workflow. ALWAYS use `git flow` commands instead
 > of regular git merge/checkout.

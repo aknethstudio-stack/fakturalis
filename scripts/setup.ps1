@@ -1,4 +1,4 @@
-# InvoiceForge Setup Script for Windows PowerShell
+# Fakturalis Setup Script for Windows PowerShell
 # This script sets up the development environment on Windows
 
 param(
@@ -77,7 +77,7 @@ function Test-NodeVersion {
 try {
     Write-Host ""
     Write-Host "========================================" -ForegroundColor White
-    Write-Host "  InvoiceForge Development Setup" -ForegroundColor White
+    Write-Host "  Fakturalis Development Setup" -ForegroundColor White
     Write-Host "========================================" -ForegroundColor White
     Write-Host ""
 

@@ -1,5 +1,5 @@
 /**
- * Pricing plans configuration for InvoiceForge
+ * Pricing plans configuration for Fakturalis
  * Contains plan details, features, and pricing information
  */
 

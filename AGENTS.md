@@ -1,10 +1,10 @@
-# 🤖 AI Agents Guide - InvoiceForge
+# 🤖 AI Agents Guide - Fakturalis
 
-This document provides context and guidelines for AI assistants working on the InvoiceForge project.
+This document provides context and guidelines for AI assistants working on the Fakturalis project.
 
 ## 📋 Project Overview
 
-**InvoiceForge** is a modern freemium SaaS invoicing application built with Next.js 15, React 19,
+**Fakturalis** is a modern freemium SaaS invoicing application built with Next.js 15, React 19,
 TypeScript, Tailwind CSS, and Supabase.
 
 - **Goal**: Competitive invoicing system for Polish market with freemium model
@@ -147,7 +147,7 @@ npm run dev:turbo
 
 ---
 
-**Remember**: InvoiceForge aims to be a practical, working solution for Polish entrepreneurs.
+**Remember**: Fakturalis aims to be a practical, working solution for Polish entrepreneurs.
 Prioritize functionality, performance, and user experience over theoretical perfection.
 
 ## 💰 Business Model & Pricing

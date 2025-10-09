@@ -55,8 +55,8 @@ export default function KSeFSettingsPage() {
                   obowiązkowa dla przedsiębiorców od 1 stycznia 2026 roku.
                 </p>
                 <p>
-                  InvoiceForge automatycznie przesyła faktury do KSeF po ich wystawieniu, zapewniając zgodność z
-                  polskimi przepisami.
+                  Fakturalis automatycznie przesyła faktury do KSeF po ich wystawieniu, zapewniając zgodność z polskimi
+                  przepisami.
                 </p>
               </div>
             </div>
@@ -152,6 +152,6 @@ export default function KSeFSettingsPage() {
 }
 
 export const metadata = {
-  title: 'Ustawienia KSeF - InvoiceForge',
+  title: 'Ustawienia KSeF - Fakturalis',
   description: 'Zarządzaj integracją z Krajowym Systemem e-Faktur (KSeF)',
 };

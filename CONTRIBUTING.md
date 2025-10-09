@@ -1,6 +1,6 @@
-# Contributing to InvoiceForge
+# Contributing to Fakturalis
 
-Thanks for your interest in contributing to InvoiceForge! This guide explains how to set up your
+Thanks for your interest in contributing to Fakturalis! This guide explains how to set up your
 development environment, our branching model (Git Flow), commit conventions (Conventional Commits),
 pull request (PR) process, and general coding standards.
 
@@ -33,8 +33,8 @@ Prerequisites:
 
 Clone and install:
 
-    git clone https://github.com/aknethstudio-stack/invoiceforge.git
-    cd invoiceforge
+    git clone https://github.com/aknethstudio-stack/fakturalis.git
+    cd fakturalis
     nvm use           # if you use nvm; otherwise ensure Node v22
     npm ci            # install exact, locked dependencies
     npm run prepare   # sets up Husky hooks
@@ -239,4 +239,4 @@ If you work solo, PRs are optional. You may finish feature/hotfix branches and m
 (feature → develop, hotfix → main) as long as lint/style/tests pass and commits follow Conventional
 Commits. Git Flow still helps keep history tidy and releases consistent.
 
-Thanks for contributing to InvoiceForge!
+Thanks for contributing to Fakturalis!

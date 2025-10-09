@@ -1,12 +1,12 @@
 @echo off
 setlocal enabledelayedexpansion
 
-:: InvoiceForge Setup Script for Windows
+:: Fakturalis Setup Script for Windows
 :: This script sets up the development environment on Windows
 
 echo.
 echo ========================================
-echo  InvoiceForge Development Setup
+echo  Fakturalis Development Setup
 echo ========================================
 echo.
 

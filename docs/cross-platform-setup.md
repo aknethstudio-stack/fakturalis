@@ -1,6 +1,6 @@
 # Cross-Platform Setup
 
-Quick setup guide for InvoiceForge on different platforms.
+Quick setup guide for Fakturalis on different platforms.
 
 ## Prerequisites
 
@@ -20,7 +20,7 @@ nvm install 22 && nvm use 22
 
 # Setup project
 git clone <repo-url>
-cd invoiceforge && npm run setup
+cd fakturalis && npm run setup
 ```
 
 ### Windows
@@ -37,7 +37,7 @@ fnm install 22 && fnm use 22
 
 # Setup project
 git clone <repo-url>
-cd invoiceforge && npm run setup
+cd fakturalis && npm run setup
 ```
 
 ## Editor Support
@@ -82,7 +82,7 @@ Handled automatically by `.gitattributes` - no action needed.
 ## Project Structure
 
 ```text
-invoiceforge/
+fakturalis/
 ├── src/              # Source code
 ├── docs/             # Technical documentation
 ├── local-notes/      # Private workspace notes

@@ -30,7 +30,7 @@ const projectToken = process.env.CODACY_PROJECT_TOKEN;
 
 if (!projectToken) {
   console.error('❌ CODACY_PROJECT_TOKEN environment variable not set');
-  console.error('Get your token from: https://app.codacy.com/gh/aknethstudio-stack/invoiceforge/settings/coverage');
+  console.error('Get your token from: https://app.codacy.com/gh/aknethstudio-stack/fakturalis/settings/coverage');
   console.error('💡 For automated uploads, use GitHub Actions instead');
   process.exit(1);
 }

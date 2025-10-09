@@ -1,4 +1,4 @@
--- KSeF (Krajowy System e-Faktur) Extensions for InvoiceForge
+-- KSeF (Krajowy System e-Faktur) Extensions for Fakturalis
 -- Rozszerzenia bazy danych dla integracji z Polskim Krajowym System e-Faktur
 -- @language postgresql
 

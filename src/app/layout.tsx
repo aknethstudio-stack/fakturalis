@@ -24,7 +24,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: 'InvoiceForge - Profesjonalne faktury online',
+  title: 'Fakturalis - Profesjonalne faktury online',
   description:
     'Nowoczesny system fakturowania dla polskich przedsiębiorców. Twórz faktury zgodne z KSeF, zarządzaj klientami i produktami.',
   keywords: ['faktury', 'fakturowanie', 'KSeF', 'przedsiębiorcy', 'małe firmy', 'księgowość'],
@@ -45,26 +45,26 @@ export const metadata: Metadata = {
   },
   manifest: '/manifest.json',
   openGraph: {
-    title: 'InvoiceForge - Profesjonalne faktury online',
+    title: 'Fakturalis - Profesjonalne faktury online',
     description: 'Nowoczesny system fakturowania dla polskich przedsiębiorców',
     url: siteUrl,
-    siteName: 'InvoiceForge',
+    siteName: 'Fakturalis',
     locale: 'pl_PL',
     type: 'website',
     images: [
       {
-        url: `${siteUrl}/invoiceforge.png`,
+        url: `${siteUrl}/fakturalis.png`,
         width: 1200,
         height: 630,
-        alt: 'InvoiceForge - System fakturowania',
+        alt: 'Fakturalis - System fakturowania',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'InvoiceForge - Profesjonalne faktury online',
+    title: 'Fakturalis - Profesjonalne faktury online',
     description: 'Nowoczesny system fakturowania dla polskich przedsiębiorców',
-    images: [`${siteUrl}/invoiceforge.png`],
+    images: [`${siteUrl}/fakturalis.png`],
   },
   robots: {
     index: true,

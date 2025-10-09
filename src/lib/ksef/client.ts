@@ -6,7 +6,7 @@
 import type { Database } from '@/types/database';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { KSEF_CONFIG } from './config';
-import type { KSeFSessionToken, KSeFInvoiceSubmission, KSeFInvoiceXML, KSeFUPO, KSeFSubmissionStatus } from './types';
+import type { KSeFInvoiceSubmission, KSeFInvoiceXML, KSeFSessionToken, KSeFSubmissionStatus, KSeFUPO } from './types';
 
 /**
  * Simple password decryption (replace with proper decryption in production)
@@ -67,7 +67,7 @@ export class KSeFClient {
             type: 'onip',
           },
           contextName: {
-            tradeName: 'InvoiceForge',
+            tradeName: 'Fakturalis',
             type: 'TradeName',
           },
           credentials: {
@@ -253,7 +253,7 @@ export class KSeFClient {
     <ksef:KodFormularza kodSystemowy="FA(2)" wersjaSchemy="1-0E"/>
     <ksef:WariantFormularza>2</ksef:WariantFormularza>
     <ksef:DataWytworzeniaFa>${new Date().toISOString()}</ksef:DataWytworzeniaFa>
-    <ksef:SystemInfo>InvoiceForge v1.0.0</ksef:SystemInfo>
+  <ksef:SystemInfo>Fakturalis v1.0.0</ksef:SystemInfo>
   </ksef:Naglowek>
   <ksef:Podmiot1>
     <ksef:DaneIdentyfikacyjne>

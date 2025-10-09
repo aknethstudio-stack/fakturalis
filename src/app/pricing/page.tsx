@@ -79,7 +79,7 @@ export default function PricingPage() {
         {/* CTA Section */}
         <div className='mt-16 rounded-2xl bg-blue-600 p-8 text-center text-white lg:p-12'>
           <h2 className='mb-4 text-3xl font-bold'>Gotowy, aby rozpocząć?</h2>
-          <p className='mb-8 text-xl'>Dołącz do tysięcy przedsiębiorców, którzy już korzystają z InvoiceForge</p>
+          <p className='mb-8 text-xl'>Dołącz do tysięcy przedsiębiorców, którzy już korzystają z Fakturalis</p>
           <button className='rounded-lg bg-white px-8 py-3 font-medium text-blue-600 transition-colors hover:bg-gray-100'>
             Rozpocznij 14-dniowy okres próbny
           </button>

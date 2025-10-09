@@ -34,7 +34,7 @@ standards.
 ### GitHub CLI
 
 ```bash
-gh api repos/aknethstudio-stack/invoiceforge/branches/master/protection \
+gh api repos/aknethstudio-stack/fakturalis/branches/master/protection \
   --method PUT \
   --field required_status_checks='{"strict":true,"contexts":["test"]}' \
   --field enforce_admins=true \
@@ -46,7 +46,7 @@ gh api repos/aknethstudio-stack/invoiceforge/branches/master/protection \
 
 ```hcl
 resource "github_branch_protection" "master" {
-  repository_id = "invoiceforge"
+  repository_id = "fakturalis"
   pattern       = "master"
 
   required_status_checks {
@@ -99,7 +99,7 @@ Optional automatic reviewer assignment:
 Temporary disable protection:
 
 ```bash
-gh api repos/aknethstudio-stack/invoiceforge/branches/master/protection --method DELETE
+gh api repos/aknethstudio-stack/fakturalis/branches/master/protection --method DELETE
 ```
 
 Re-enable using configuration methods above.
