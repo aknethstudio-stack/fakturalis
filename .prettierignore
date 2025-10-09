@@ -138,3 +138,6 @@ webpack-stats.json
 
 # Local notes and planning documents (manual formatting)
 local-notes/
+
+# Instrukcje dla Codacy – ignoruj formatowanie
+.github/instructions/codacy.instructions.md
