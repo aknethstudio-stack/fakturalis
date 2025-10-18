@@ -7,19 +7,44 @@
 
 import { logger } from '@/lib/logger';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import type { FieldError } from 'react-hook-form';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
-const ksefConnectionSchema = z.object({
-  nip: z
-    .string()
-    .min(1, 'NIP jest wymagany')
-    .transform((val) => val.replace(/[-\s]/g, ''))
-    .refine((val) => /^\d{10}$/.test(val), { message: 'NIP musi składać się z 10 cyfr' }),
-  ksefLogin: z.string().min(1, 'Login KSeF jest wymagany').email('Podaj prawidłowy adres email'),
-  ksefPassword: z.string().min(1, 'Hasło KSeF jest wymagane').min(8, 'Hasło musi mieć co najmniej 8 znaków'),
-});
+const ksefConnectionSchema = z
+  .object({
+    nip: z
+      .string()
+      .min(1, 'NIP jest wymagany')
+      .transform((val) => val.replace(/[-\s]/g, ''))
+      .refine((val) => /^\d{10}$/.test(val), { message: 'NIP musi składać się z 10 cyfr' }),
+    ksefLogin: z.string().min(1, 'Login KSeF jest wymagany').email('Podaj prawidłowy adres email'),
+    ksefPassword: z.string().min(1, 'Hasło KSeF jest wymagane').min(8, 'Hasło musi mieć co najmniej 8 znaków'),
+    // Optional certificate upload: user can upload their signed certificate (P12/PFX).
+    certificate: z.any().optional(),
+    certificatePassword: z.string().optional(),
+  })
+  .superRefine((data, ctx) => {
+    // If a certificate file is provided, require a certificate password (at least 4 chars)
+    if (data.certificate) {
+      if (!data.certificatePassword || String(data.certificatePassword).trim().length < 4) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Hasło do pliku certyfikatu jest wymagane (min. 4 znaki)',
+          path: ['certificatePassword'],
+        });
+      }
+    }
+  });
+
+function getFieldErrorMessage(err?: FieldError | string | Record<string, unknown>): string | undefined {
+  if (!err) return undefined;
+  if (typeof err === 'string') return err;
+  const rec = err as Record<string, unknown>;
+  if (rec && typeof rec.message === 'string') return rec.message;
+  return undefined;
+}
 
 type KSeFConnectionForm = z.infer<typeof ksefConnectionSchema>;
 
@@ -67,12 +92,48 @@ export default function KSeFConnection() {
     setSuccess('');
 
     try {
+      // If a certificate file is provided, read it as base64 (without data URI prefix)
+      let certificateBase64: string | undefined = undefined;
+      if (data.certificate) {
+        const fileList = data.certificate as FileList | undefined;
+        if (fileList && fileList.length > 0 && fileList[0]) {
+          const file = fileList[0] as File;
+          certificateBase64 = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+              const result = reader.result;
+              if (typeof result !== 'string') {
+                return reject(new Error('Nieobsługiwany format pliku certyfikatu'));
+              }
+              const parts = result.split(',');
+              const b64 = parts.length > 1 ? parts[1] : parts[0] || '';
+              // Ensure we always resolve with a string to satisfy the Promise<string> signature
+              resolve(String(b64));
+            };
+            reader.onerror = () => reject(new Error('Błąd odczytu pliku certyfikatu'));
+            // readAsDataURL expects a Blob; file is guaranteed by the guard above
+            reader.readAsDataURL(file as Blob);
+          });
+        }
+      }
+
+      const payload: Record<string, unknown> = {
+        nip: data.nip,
+        ksefLogin: data.ksefLogin,
+        ksefPassword: data.ksefPassword,
+      };
+
+      if (certificateBase64) {
+        payload.certificate_content = certificateBase64;
+        payload.certificate_password = data.certificatePassword;
+      }
+
       const response = await fetch('/api/ksef/connect', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(payload),
       });
 
       const result = await response.json();
@@ -93,9 +154,9 @@ export default function KSeFConnection() {
   };
 
   // Check connection status on component mount
-  useState(() => {
+  useEffect(() => {
     checkConnection();
-  });
+  }, []);
 
   return (
     <div className='mx-auto max-w-md rounded-lg bg-white p-6 shadow-lg'>
@@ -202,6 +263,39 @@ export default function KSeFConnection() {
             className='mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 focus:outline-none'
           />
           {errors.ksefPassword && <p className='mt-1 text-sm text-red-600'>{errors.ksefPassword.message}</p>}
+        </div>
+
+        {/* Certificate upload (optional) */}
+        <div>
+          <label htmlFor='certificate' className='block text-sm font-medium text-gray-700'>
+            Plik certyfikatu (P12/PFX) - opcjonalnie
+          </label>
+          <input
+            {...register('certificate')}
+            type='file'
+            id='certificate'
+            accept='.p12,.pfx'
+            className='mt-1 block w-full text-sm'
+          />
+          {errors.certificate && (
+            <p className='mt-1 text-sm text-red-600'>{getFieldErrorMessage(errors.certificate)}</p>
+          )}
+        </div>
+
+        <div>
+          <label htmlFor='certificatePassword' className='block text-sm font-medium text-gray-700'>
+            Hasło do certyfikatu {/* visible/required only when file provided - validated by schema */}
+          </label>
+          <input
+            {...register('certificatePassword')}
+            type='password'
+            id='certificatePassword'
+            placeholder='Hasło do pliku certyfikatu'
+            className='mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 focus:outline-none'
+          />
+          {errors.certificatePassword && (
+            <p className='mt-1 text-sm text-red-600'>{errors.certificatePassword.message}</p>
+          )}
         </div>
 
         <div className='pt-4'>

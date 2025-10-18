@@ -114,6 +114,123 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [reportHistoryLoading, setReportHistoryLoading] = useState(false);
+  // Time range for charts: presets include relative windows and calendar granularities
+  const [timeRange, setTimeRange] = useState<'7d' | '30d' | 'day' | 'week' | 'month' | 'year'>('30d');
+  // Keep raw invoice rows so we can aggregate client-side by selected range/granularity
+  const [invoicesRaw, setInvoicesRaw] = useState<Invoice[]>([]);
+  // Derived series for charts (label/value)
+  const [revenueSeries, setRevenueSeries] = useState<Array<{ label: string; value: number }>>([]);
+  const [cashflowSeries, setCashflowSeries] = useState<Array<{ label: string; value: number }>>([]);
+
+  // Helper: readable label for range (used in UI)
+  const rangeLabel = (r: typeof timeRange) => {
+    switch (r) {
+      case '7d':
+        return '7 dni';
+      case '30d':
+        return '30 dni';
+      case 'day':
+        return 'Dzień';
+      case 'week':
+        return 'Tydzień';
+      case 'month':
+        return 'Miesiąc';
+      case 'year':
+        return 'Rok';
+      default:
+        return r as string;
+    }
+  };
+
+  // Helper: aggregate invoices into time buckets depending on selected range
+  const aggregateInvoices = useCallback((range: typeof timeRange, invoices: Invoice[]) => {
+    const now = new Date();
+    const series: Array<{ label: string; value: number }> = [];
+
+    const addBucket = (label: string, value: number) => {
+      series.push({ label, value });
+    };
+
+    if (range === '7d' || range === '30d') {
+      const days = range === '7d' ? 7 : 30;
+      for (let i = days - 1; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
+        const label = d.toLocaleDateString('pl-PL', { day: '2-digit', month: '2-digit' });
+        const start = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0);
+        const end = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59);
+        const total = invoices.reduce((sum, inv) => {
+          if (inv.status !== 'paid') return sum;
+          const created = new Date(inv.created_at as string);
+          return created >= start && created <= end ? sum + (inv.total_gross || 0) : sum;
+        }, 0);
+        addBucket(label, total);
+      }
+    } else if (range === 'day') {
+      for (let h = 23; h >= 0; h--) {
+        const d = new Date(now.getTime() - h * 60 * 60 * 1000);
+        const label = d.getHours().toString().padStart(2, '0') + ':00';
+        const start = new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), 0, 0);
+        const end = new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), 59, 59);
+        const total = invoices.reduce((sum, inv) => {
+          if (inv.status !== 'paid') return sum;
+          const created = new Date(inv.created_at as string);
+          return created >= start && created <= end ? sum + (inv.total_gross || 0) : sum;
+        }, 0);
+        addBucket(label, total);
+      }
+    } else if (range === 'week') {
+      for (let i = 11; i >= 0; i--) {
+        const start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i * 7);
+        start.setHours(0, 0, 0, 0);
+        const end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 6, 23, 59, 59);
+        const label = `Tydz ${start.toLocaleDateString('pl-PL', { day: '2-digit', month: '2-digit' })}`;
+        const total = invoices.reduce((sum, inv) => {
+          if (inv.status !== 'paid') return sum;
+          const created = new Date(inv.created_at as string);
+          return created >= start && created <= end ? sum + (inv.total_gross || 0) : sum;
+        }, 0);
+        addBucket(label, total);
+      }
+    } else if (range === 'month') {
+      for (let i = 11; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const monthStart = new Date(d.getFullYear(), d.getMonth(), 1);
+        const monthEnd = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59);
+        const label = d.toLocaleDateString('pl-PL', { month: 'short', year: '2-digit' });
+        const total = invoices.reduce((sum, inv) => {
+          if (inv.status !== 'paid') return sum;
+          const created = new Date(inv.created_at as string);
+          return created >= monthStart && created <= monthEnd ? sum + (inv.total_gross || 0) : sum;
+        }, 0);
+        addBucket(label, total);
+      }
+    } else if (range === 'year') {
+      for (let i = 4; i >= 0; i--) {
+        const year = now.getFullYear() - i;
+        const start = new Date(year, 0, 1);
+        const end = new Date(year, 11, 31, 23, 59, 59);
+        const label = year.toString();
+        const total = invoices.reduce((sum, inv) => {
+          if (inv.status !== 'paid') return sum;
+          const created = new Date(inv.created_at as string);
+          return created >= start && created <= end ? sum + (inv.total_gross || 0) : sum;
+        }, 0);
+        addBucket(label, total);
+      }
+    }
+
+    return series;
+  }, []);
+
+  // Recompute series when invoicesRaw or timeRange change
+  useEffect(() => {
+    try {
+      setRevenueSeries(aggregateInvoices(timeRange, invoicesRaw));
+      setCashflowSeries(aggregateInvoices(timeRange, invoicesRaw));
+    } catch (err) {
+      logger.error('Błąd agregacji danych wykresu', err);
+    }
+  }, [timeRange, invoicesRaw, aggregateInvoices]);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -130,10 +247,38 @@ export default function DashboardPage() {
       setError('');
 
       // Fetch total revenue
-      const invoiceRes = await supabase
-        .from('invoices')
-        .select('total_gross, status, due_date, created_at')
-        .eq('owner_id', user.id);
+      // Calculate date range to fetch based on selected timeRange to reduce transferred data
+      let rangeStart: Date | null = null;
+      let rangeEnd: Date | null = null;
+      const now = new Date();
+      if (timeRange === '7d') {
+        rangeStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6, 0, 0, 0);
+        rangeEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+      } else if (timeRange === '30d') {
+        rangeStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 29, 0, 0, 0);
+        rangeEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+      } else if (timeRange === 'day') {
+        rangeStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+        rangeEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+      } else if (timeRange === 'week') {
+        rangeStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7 * 11, 0, 0, 0); // ~12 weeks
+        rangeEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+      } else if (timeRange === 'month') {
+        rangeStart = new Date(now.getFullYear(), now.getMonth() - 11, 1, 0, 0, 0); // 12 months
+        rangeEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+      } else if (timeRange === 'year') {
+        rangeStart = new Date(now.getFullYear() - 4, 0, 1, 0, 0, 0); // 5 years
+        rangeEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+      }
+
+      let invoiceQuery = supabase.from('invoices').select('total_gross, status, due_date, created_at');
+      invoiceQuery = invoiceQuery.eq('owner_id', user.id);
+      if (rangeStart && rangeEnd) {
+        invoiceQuery = invoiceQuery
+          .gte('created_at', rangeStart.toISOString())
+          .lte('created_at', rangeEnd.toISOString());
+      }
+      const invoiceRes = await invoiceQuery;
       let invoiceData: Array<{ total_gross: number; status: string; due_date: string; created_at: string }> = [];
       if (invoiceRes && typeof invoiceRes === 'object' && 'error' in invoiceRes && invoiceRes.error) {
         logger.error('Błąd pobierania faktur', invoiceRes.error);
@@ -145,6 +290,9 @@ export default function DashboardPage() {
       ) {
         invoiceData = invoiceRes.data;
       }
+
+      // store raw invoices for client-side aggregation by range
+      setInvoicesRaw(invoiceData as unknown as Invoice[]);
 
       // Fetch clients count
       const clientsRes = await supabase
@@ -205,7 +353,6 @@ export default function DashboardPage() {
 
       // Calculate monthly revenue for the last 6 months
       const monthlyRevenue = [];
-      const now = new Date();
       for (let i = 5; i >= 0; i--) {
         const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
         const monthStart = new Date(date.getFullYear(), date.getMonth(), 1);
@@ -286,7 +433,7 @@ export default function DashboardPage() {
     } finally {
       setLoading(false);
     }
-  }, [user, supabase]);
+  }, [user, supabase, timeRange]);
 
   useEffect(() => {
     if (user) {
@@ -646,13 +793,30 @@ export default function DashboardPage() {
             <h2 className='text-lg font-semibold text-gray-900'>Przychody miesięczne</h2>
             <BsBarChart className='h-5 w-5 text-gray-500' />
           </div>
+          <div className='mb-4 flex items-center justify-between'>
+            <div className='flex gap-2'>
+              {(['7d', '30d', 'day', 'week', 'month', 'year'] as const).map((r) => (
+                <button
+                  key={r}
+                  onClick={() => setTimeRange(r)}
+                  className={cn(
+                    'rounded px-3 py-1',
+                    'text-sm',
+                    timeRange === r ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700',
+                  )}>
+                  {rangeLabel(r)}
+                </button>
+              ))}
+            </div>
+            <div className='text-sm text-gray-500'>Zakres: {timeRange}</div>
+          </div>
           <ResponsiveContainer width='100%' height={220}>
-            <LineChart data={stats.monthlyRevenue} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
-              <XAxis dataKey='month' />
+            <LineChart data={revenueSeries} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+              <XAxis dataKey='label' />
               <YAxis />
               <Tooltip formatter={(value: number) => formatCurrency(value)} />
               <Legend />
-              <Line type='monotone' dataKey='revenue' stroke='#2563eb' strokeWidth={3} dot={{ r: 4 }} name='Przychód' />
+              <Line type='monotone' dataKey='value' stroke='#2563eb' strokeWidth={3} dot={{ r: 4 }} name='Przychód' />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -664,8 +828,8 @@ export default function DashboardPage() {
             <BsBarChart className='h-5 w-5 text-orange-500' />
           </div>
           <ResponsiveContainer width='100%' height={220}>
-            <BarChart data={stats.cashflow} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
-              <XAxis dataKey='month' />
+            <BarChart data={cashflowSeries} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+              <XAxis dataKey='label' />
               <YAxis />
               <Tooltip formatter={(value: number) => formatCurrency(value)} />
               <Legend />

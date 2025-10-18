@@ -153,6 +153,7 @@ $RECYCLE.BIN/
 .emacs.d/
 .atom/
 .sublime-*
+.gemini/
 
 # Version control
 .git/

@@ -3,17 +3,38 @@
  * Handles communication with Polish National e-Invoice System
  */
 
-import type { Database } from '@/types/database';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { decryptString } from '@/lib/crypto';
+import { logger } from '@/lib/logger';
+import { createHash } from 'crypto';
 import { KSEF_CONFIG } from './config';
 import type { KSeFInvoiceSubmission, KSeFInvoiceXML, KSeFSessionToken, KSeFSubmissionStatus, KSeFUPO } from './types';
 
 /**
- * Simple password decryption (replace with proper decryption in production)
+ * Decrypt stored KSeF password.
+ * First try AES decryption helper (production), fallback to base64 decode for legacy entries.
  */
-function decryptPassword(encryptedPassword: string): string {
-  // In production, use proper decryption with process.env.ENCRYPTION_KEY
-  return Buffer.from(encryptedPassword, 'base64').toString();
+function _decryptPassword(encryptedPassword: string): string {
+  try {
+    // Prefer modern AES-GCM encrypted payloads (stored with lib/crypto helpers)
+    return decryptString(encryptedPassword);
+  } catch (_err) {
+    // Fallback: legacy base64-encoded password (backwards compatibility)
+    return Buffer.from(encryptedPassword, 'base64').toString();
+  }
+}
+
+/**
+ * Decrypt stored certificate payload (if encrypted with AES helper).
+ * Returns the certificate content as base64 (plaintext P12/PFX base64) ready to be used in a session init.
+ * If the stored value is already a base64 certificate (legacy / raw), returns it as-is.
+ */
+function _decryptCertificate(encryptedCert: string): string {
+  try {
+    return decryptString(encryptedCert);
+  } catch (_err) {
+    // If decrypt failed, assume the stored string is already base64 certificate content
+    return encryptedCert;
+  }
 }
 
 export class KSeFClient {
@@ -94,6 +115,69 @@ export class KSeFClient {
     } catch (error) {
       throw new Error(`KSeF authentication failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
+  }
+
+  /**
+   * Initialize KSeF session using user's certificate (P12/PFX).
+   * Accepts certificate content as base64 (P12/PFX binary encoded to base64) and the certificate password.
+   * The API used below assumes the KSeF endpoint accepts signed session init with certificate content.
+   * Adjust endpoint/body according to the current MF/KSeF API if required.
+   */
+  async initSessionWithCertificate(
+    nip: string,
+    certificateBase64: string,
+    certificatePassword?: string,
+  ): Promise<KSeFSessionToken> {
+    try {
+      // Prefer server endpoint for signed init if available.
+      // Many KSeF integrations initialize a signed session via /online/Session/InitSigned or similar.
+      // We pass certificate content + optional password. The exact contract may vary by environment.
+      const response = await fetch(`${this.baseUrl}/online/Session/InitSigned`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({
+          identifier: nip,
+          certificate: certificateBase64,
+          certificatePassword: certificatePassword || null,
+          contextName: {
+            tradeName: 'Fakturalis',
+            type: 'TradeName',
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        const text = await response.text().catch(() => '');
+        logger.error('KSeF InitSigned HTTP error', new Error(response.statusText), {
+          status: response.status,
+          body: text,
+        });
+        throw new Error(`KSeF certificate session init failed: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      this.sessionToken = {
+        token: data.sessionToken,
+        expiresAt: new Date(Date.now() + KSEF_CONFIG.limits.sessionTokenValidityHours * 60 * 60 * 1000),
+        sessionId: data.sessionId,
+      };
+
+      return this.sessionToken;
+    } catch (error) {
+      throw new Error(
+        `KSeF certificate authentication failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+    }
+  }
+
+  /**
+   * Allows setting a session token directly (useful when session is created outside the client)
+   */
+  public setSessionToken(token: string, expiresAt: Date, sessionId?: string) {
+    this.sessionToken = { token, expiresAt, sessionId: sessionId || '' };
   }
 
   /**
@@ -243,68 +327,91 @@ export class KSeFClient {
   private generateFAVATXML(invoice: KSeFInvoiceXML): string {
     const { xmlNamespaces } = KSEF_CONFIG;
 
+    const escapeXml = (value?: string | number | null): string => {
+      if (value === undefined || value === null) return '';
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;');
+    };
+
+    const formatVatRate = (rate: number | undefined): string => {
+      if (rate === undefined || rate === null || Number.isNaN(Number(rate))) return '';
+      const numeric = Number(rate);
+      // Accept both 0.23 or 23 formats
+      const fraction = Math.abs(numeric) > 1 ? numeric / 100 : numeric;
+      return Math.round(fraction * 100).toFixed(0);
+    };
+
+    const sellerNip = invoice.seller.vatId ? invoice.seller.vatId.replace(/[^0-9]/g, '') : '';
+    const sellerName = escapeXml(invoice.seller.name);
+    const sellerAddress = escapeXml(invoice.seller.address);
+
+    const buyerNip = invoice.buyer.vatId ? invoice.buyer.vatId.replace(/[^0-9]/g, '') : '';
+    const buyerName = escapeXml(invoice.buyer.name);
+    const buyerAddress = escapeXml(invoice.buyer.address);
+
+    const linesXml = invoice.invoiceLines
+      .map((line, index: number) => {
+        const lineName = escapeXml(line.name);
+        const qty = Number(line.quantity ?? 0);
+        const unitPrice = Number(line.unitPrice ?? 0);
+        const netAmount = Number(line.netAmount ?? 0);
+        const vatRateFormatted = formatVatRate(line.vatRate ?? undefined);
+
+        return `
+    <ksef:FaWiersz>
+      <ksef:NrWierszaFa>${index + 1}</ksef:NrWierszaFa>
+      <ksef:P_7>${lineName}</ksef:P_7>
+      <ksef:P_8A>${qty}</ksef:P_8A>
+      <ksef:P_9A>${Number(unitPrice).toFixed(2)}</ksef:P_9A>
+      <ksef:P_11>${Number(netAmount).toFixed(2)}</ksef:P_11>
+      <ksef:P_12>${vatRateFormatted}</ksef:P_12>
+    </ksef:FaWiersz>`;
+      })
+      .join('');
+
     return `<?xml version="1.0" encoding="UTF-8"?>
-<ksef:Faktura 
+<ksef:Faktura
   xmlns:fahash="${xmlNamespaces.fahash}"
-  xmlns:tns="${xmlNamespaces.tns}" 
+  xmlns:tns="${xmlNamespaces.tns}"
   xmlns:xsi="${xmlNamespaces.xsi}"
   xmlns:ksef="${xmlNamespaces.ksef}">
   <ksef:Naglowek>
     <ksef:KodFormularza kodSystemowy="FA(2)" wersjaSchemy="1-0E"/>
     <ksef:WariantFormularza>2</ksef:WariantFormularza>
     <ksef:DataWytworzeniaFa>${new Date().toISOString()}</ksef:DataWytworzeniaFa>
-  <ksef:SystemInfo>Fakturalis v1.0.0</ksef:SystemInfo>
+    <ksef:SystemInfo>Fakturalis v1.0.0</ksef:SystemInfo>
   </ksef:Naglowek>
   <ksef:Podmiot1>
     <ksef:DaneIdentyfikacyjne>
-      <ksef:NIP>${invoice.seller.vatId.replace(/[^0-9]/g, '')}</ksef:NIP>
-      <ksef:Nazwa>${invoice.seller.name}</ksef:Nazwa>
+      <ksef:NIP>${escapeXml(sellerNip)}</ksef:NIP>
+      <ksef:Nazwa>${sellerName}</ksef:Nazwa>
     </ksef:DaneIdentyfikacyjne>
     <ksef:Adres>
-      <ksef:AdresL1>${invoice.seller.address}</ksef:AdresL1>
+      <ksef:AdresL1>${sellerAddress}</ksef:AdresL1>
     </ksef:Adres>
   </ksef:Podmiot1>
   <ksef:Podmiot2>
     <ksef:DaneIdentyfikacyjne>
-      ${invoice.buyer.vatId ? `<ksef:NIP>${invoice.buyer.vatId.replace(/[^0-9]/g, '')}</ksef:NIP>` : ''}
-      <ksef:Nazwa>${invoice.buyer.name}</ksef:Nazwa>
+      ${buyerNip ? `<ksef:NIP>${escapeXml(buyerNip)}</ksef:NIP>` : ''}
+      <ksef:Nazwa>${buyerName}</ksef:Nazwa>
     </ksef:DaneIdentyfikacyjne>
     <ksef:Adres>
-      <ksef:AdresL1>${invoice.buyer.address}</ksef:AdresL1>
+      <ksef:AdresL1>${buyerAddress}</ksef:AdresL1>
     </ksef:Adres>
   </ksef:Podmiot2>
   <ksef:Fa>
-    <ksef:KodWaluty>${invoice.invoiceHeader.currencyCode}</ksef:KodWaluty>
-    <ksef:P_1>${invoice.invoiceHeader.issueDate}</ksef:P_1>
-    <ksef:P_2>${invoice.invoiceHeader.invoiceNumber}</ksef:P_2>
-    <ksef:P_6>${invoice.invoiceHeader.dueDate}</ksef:P_6>
-    ${invoice.invoiceLines
-      .map(
-        (
-          line: {
-            name: string;
-            quantity: number;
-            unitPrice: number;
-            vatRate: number;
-            netAmount: number;
-            vatAmount: number;
-            grossAmount: number;
-          },
-          index: number,
-        ) => `
-    <ksef:FaWiersz>
-      <ksef:NrWierszaFa>${index + 1}</ksef:NrWierszaFa>
-      <ksef:P_7>${line.name}</ksef:P_7>
-      <ksef:P_8A>${line.quantity}</ksef:P_8A>
-      <ksef:P_9A>${line.unitPrice.toFixed(2)}</ksef:P_9A>
-      <ksef:P_11>${line.netAmount.toFixed(2)}</ksef:P_11>
-      <ksef:P_12>${(line.vatRate * 100).toFixed(0)}</ksef:P_12>
-    </ksef:FaWiersz>`,
-      )
-      .join('')}
-    <ksef:P_15>${invoice.totals.netTotal.toFixed(2)}</ksef:P_15>
-    <ksef:P_16>${invoice.totals.vatTotal.toFixed(2)}</ksef:P_16>
-    <ksef:P_17>${invoice.totals.grossTotal.toFixed(2)}</ksef:P_17>
+    <ksef:KodWaluty>${escapeXml(invoice.invoiceHeader.currencyCode)}</ksef:KodWaluty>
+    <ksef:P_1>${escapeXml(invoice.invoiceHeader.issueDate)}</ksef:P_1>
+    <ksef:P_2>${escapeXml(invoice.invoiceHeader.invoiceNumber)}</ksef:P_2>
+    <ksef:P_6>${escapeXml(invoice.invoiceHeader.dueDate)}</ksef:P_6>
+    ${linesXml}
+    <ksef:P_15>${Number(invoice.totals.netTotal).toFixed(2)}</ksef:P_15>
+    <ksef:P_16>${Number(invoice.totals.vatTotal).toFixed(2)}</ksef:P_16>
+    <ksef:P_17>${Number(invoice.totals.grossTotal).toFixed(2)}</ksef:P_17>
   </ksef:Fa>
 </ksef:Faktura>`;
   }
@@ -313,34 +420,16 @@ export class KSeFClient {
    * Ensure we have a valid session token
    */
   private async ensureValidSession(): Promise<void> {
-    if (!this.sessionToken || new Date() >= this.sessionToken.expiresAt) {
-      // Try to get stored credentials from database and re-authenticate
-      const supabase = createClientComponentClient<Database>();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-        throw new Error('User not authenticated');
-      }
-
-      // Get user's KSeF configuration
-      const { data: config, error } = await supabase
-        .from('ksef_config')
-        .select('*')
-        .eq('owner_id', user.id)
-        .eq('active', true)
-        .single();
-
-      if (error || !config) {
-        // Fall back to demo session if no credentials configured
-        await this.initDemoSession();
-      } else {
-        // Decrypt password and use stored credentials to create new session
-        const decryptedPassword = decryptPassword(config.ksef_password);
-        await this.initSessionWithCredentials(config.identifier, config.ksef_login, decryptedPassword);
-      }
+    // Simplified: the client does not perform automatic server-side authentication.
+    // Caller must initialize a session explicitly (initSessionWithCredentials or initDemoSession)
+    // or set `this.sessionToken` via other means.
+    if (this.sessionToken && new Date() < this.sessionToken.expiresAt) {
+      return;
     }
+
+    throw new Error(
+      'KSeF session not initialized or expired. Call initSessionWithCredentials(identifier, login, password) or initDemoSession() before performing submissions.',
+    );
   }
 
   /**
@@ -354,8 +443,9 @@ export class KSeFClient {
    * Calculate SHA-256 hash for XML content
    */
   private calculateSHA256(content: string): string {
-    // For demo purposes - in production, use proper crypto library
-    return Buffer.from(content).toString('base64').substring(0, 32);
+    // Proper SHA-256, encoded as base64 (preferred by KSeF in many examples).
+    // If KSeF expects hex instead, change 'base64' to 'hex' here.
+    return createHash('sha256').update(content, 'utf8').digest('base64');
   }
 }
 

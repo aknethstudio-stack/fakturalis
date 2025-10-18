@@ -3,6 +3,7 @@
  * Connects user's KSeF portal credentials to Fakturalis
  */
 
+import { encryptString } from '@/lib/crypto';
 import { ksefClient } from '@/lib/ksef/client';
 import { logger } from '@/lib/logger';
 import { createRateLimitMiddleware } from '@/lib/rate-limit';
@@ -28,10 +29,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Nieautoryzowany dostęp' }, { status: 401 });
     }
 
-    const { nip, ksefLogin, ksefPassword } = await request.json();
+    const { nip, ksefLogin, ksefPassword, certificate_content, certificate_password } = await request.json();
 
-    if (!nip || !ksefLogin || !ksefPassword) {
-      return NextResponse.json({ error: 'Brak wymaganych danych (NIP, login, hasło)' }, { status: 400 });
+    if (!nip) {
+      return NextResponse.json({ error: 'Brak NIPu' }, { status: 400 });
+    }
+
+    const hasLogin = !!ksefLogin && !!ksefPassword;
+    const hasCert = !!certificate_content && !!certificate_password;
+
+    if (!hasLogin && !hasCert) {
+      return NextResponse.json({ error: 'Podaj login i hasło KSeF albo załaduj certyfikat z hasłem' }, { status: 400 });
     }
 
     // Validate NIP format
@@ -41,20 +49,36 @@ export async function POST(request: NextRequest) {
     }
 
     try {
-      // Test connection with user's KSeF credentials
-      const session = await ksefClient.initSessionWithCredentials(cleanNIP, ksefLogin, ksefPassword);
-
-      // Encrypt and save credentials to database
-      const encryptedPassword = await encryptPassword(ksefPassword);
-
-      const { error: saveError } = await supabase.from('ksef_config').upsert({
+      let session;
+      const configPayload: Record<string, unknown> = {
         owner_id: user.id,
         environment: process.env.NODE_ENV === 'production' ? 'production' : 'demo',
         identifier: cleanNIP,
-        ksef_login: ksefLogin,
-        ksef_password: encryptedPassword,
         active: true,
-      });
+      };
+
+      // Prefer certificate-based flow if certificate content provided
+      if (certificate_content && certificate_password) {
+        // certificate_content is expected as base64 (client sends file as base64)
+        // Test session with certificate
+        session = await ksefClient.initSessionWithCertificate(cleanNIP, certificate_content, certificate_password);
+
+        // Encrypt and save certificate + password
+        const encryptedCert = encryptString(certificate_content);
+        const encryptedCertPwd = encryptString(certificate_password);
+        configPayload.certificate_content = encryptedCert;
+        configPayload.certificate_password = encryptedCertPwd;
+      } else {
+        // Test connection with user's KSeF credentials
+        session = await ksefClient.initSessionWithCredentials(cleanNIP, ksefLogin, ksefPassword);
+
+        // Encrypt and save credentials to database
+        const encryptedPassword = await encryptPassword(ksefPassword);
+        configPayload.ksef_login = ksefLogin;
+        configPayload.ksef_password = encryptedPassword;
+      }
+
+      const { error: saveError } = await supabase.from('ksef_config').upsert(configPayload);
 
       if (saveError) {
         logger.error('Failed to save KSeF config', saveError, {
@@ -71,15 +95,19 @@ export async function POST(request: NextRequest) {
         data: {
           nip: cleanNIP,
           sessionValid: true,
-          expiresAt: session.expiresAt,
+          expiresAt: session?.expiresAt,
         },
       });
     } catch (ksefError) {
       // KSeF authentication failed
+      logger.error('KSeF connection error during init', ksefError as Error, {
+        endpoint: '/api/ksef/connect',
+        userId: (await await createRouteHandlerClient({ cookies }).auth.getUser()).data.user?.id,
+      });
       return NextResponse.json(
         {
           error: 'Błąd połączenia z KSeF',
-          details: ksefError instanceof Error ? ksefError.message : 'Sprawdź dane logowania',
+          details: ksefError instanceof Error ? ksefError.message : 'Sprawdź dane logowania lub poprawność certyfikatu',
         },
         { status: 400 },
       );
@@ -101,11 +129,14 @@ export async function POST(request: NextRequest) {
 }
 
 /**
- * Simple password encryption (replace with proper encryption in production)
+ * Password encryption using AES-256-GCM helper
+ *
+ * Requirements:
+ * - Set ENCRYPTION_KEY env variable to a base64-encoded 32-byte key.
  */
 async function encryptPassword(password: string): Promise<string> {
-  // In production, use proper encryption with process.env.ENCRYPTION_KEY
-  return Buffer.from(password).toString('base64');
+  // Use AES-256-GCM encryptString from lib/crypto
+  return encryptString(password);
 }
 
 export async function GET(request: NextRequest) {
